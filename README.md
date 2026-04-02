@@ -1,6 +1,6 @@
-# Card Engine Pro
+# Deck Template Builder
 
-**Card Engine Pro** is a desktop development environment designed for the creation of high-fidelity board games and trading card games (TCG). Unlike conventional graphic design tools, this system acts as a **dynamic data interpreter**, enabling the mass generation of printed assets through an automated optimization pipeline and an intelligent templating engine.
+**Deck template Builder** is a desktop development environment designed for the creation of high-fidelity board games and trading card games (TCG). Unlike conventional graphic design tools, this system acts as a **dynamic data interpreter**, enabling the mass generation of printed assets through an automated optimization pipeline and an intelligent templating engine.
 
 ---
 
@@ -8,17 +8,17 @@
 
 This project was born to bridge the gap between **visual design** and **game data balancing**. In game development, values, icons, and attributes change constantly during playtesting.
 
-**Card Engine Pro** allows these changes to be instantly reflected across hundreds of final files without manual intervention, guaranteeing professional pre-press precision of **200 px/cm** ($508$ DPI).
+**Deck Template Builder** allows these changes to be instantly reflected across hundreds of final files without manual intervention.
 
 ---
 
 ## 🚀 Technological Pillars
 
-### 1. High-Density Canvas ($1000 \times 1800$ px)
+### 1. High-Density Canvas
 
 - **DOM-Based Architecture:** Utilizes HTML5 and CSS3 layers for rendering, allowing for more agile, data-bindable object manipulation than traditional bitmaps.
 - **GPU-Accelerated Visualization:** Implements a zoom system via `transform: scale()` that offloads processing to the graphics card, maintaining main-thread fluidity regardless of asset load.
-- **Immutable Export:** Output resolution is independent of the user's zoom level, ensuring the final render is always a native $1000 \times 1800$ px.
+- **Immutable Export:** Output resolution is independent of the user's zoom level, ensuring the final render is always the defined size.
 
 ### 2. Smart Data Mapping
 
