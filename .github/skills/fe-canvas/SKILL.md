@@ -9,17 +9,18 @@ description: Canvas component development and card rendering. Use when: building
 
 src/renderer/src/components/canvas/Canvas.tsx
 
-## Fixed Dimensions (Non-negotiable)
+## Dynamic Dimensions
 
-- Width: 1000px (CANVAS_BASE_WIDTH from constants)
-- Height: 1800px (CANVAS_HEIGHT from constants)
-- Imported from /common/constants.ts
+- **Source**: `project.canvasConfig` (from Zustand store, NOT globals)
+- **Default**: 1000px W × 1800px H (if not configured)
+- **Range**: Width 500-3000px, Height 800-5000px
+- **Responsive**: CSS custom properties + aspect-ratio for scaling
 
 ## Architecture
 
-- **Container**: Centered div with fixed size + overflow-hidden
-- **CardRenderer sub-component**: Renders individual card content
-- **State source**: useCardStore() for selectedCard
+- **Container**: Dynamic size based on canvasConfig + aspect-ratio scaling
+- **CardRenderer sub-component**: Renders individual card content (responsive to canvas dims)
+- **State source**: `useCardStore()` for selectedCard + project config
 
 ## Responsibilities
 

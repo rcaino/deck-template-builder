@@ -10,15 +10,19 @@ applyTo: "src/renderer/**"
 
 ### Canvas Component (`/components/canvas/`)
 
-- **Fixed dimensions**: 1000x1800px (from `CANVAS_BASE_WIDTH` constant)
-- Renders card design live
+- **Dynamic dimensions**: Read from `project.canvasConfig` (default 1000x1800px)
+- Renders card design live with responsive scaling
 - Respond to sidebar selection and inspector edits
-- Use Zustand store for card state
+- Use Zustand store for card state + project config
+- Support customizable canvas size per project (500-3000w, 800-5000h)
 
 ### Sidebar Component (`/components/sidebar/`)
 
-- List of asset categories (hero_class, item_type, etc.)
-- Display WebP images from `asset://` protocol
+- **Dynamic component tabs** (from `useCardStore.components`)
+- Each tab represents a project component (hero_class, rarity, element, etc.)
+- Display WebP images for each component value (tanque, dps, healer, etc.)
+- Click image → `updateCard({ components: { [componentName]: selectedValue } })`
+- Images served via `asset://{componentName}/{value}.webp` protocol
 - Trigger selection updates to store
 
 ### Inspector Component (`/components/inspector/`)
@@ -34,19 +38,29 @@ import create from "zustand";
 
 interface CardStore {
   cards: ICard[];
+  components: IComponent[]; // From project.ctm
   selectedCard: ICard | null;
+
+  loadCards: (cards: ICard[]) => void;
+  loadComponents: (components: IComponent[]) => void;
   updateCard: (id: string, updates: Partial<ICard>) => void;
 }
 
 export const useCardStore = create<CardStore>((set) => ({
   cards: [],
+  components: [],
   selectedCard: null,
+
+  loadCards: (cards) => set({ cards }),
+  loadComponents: (components) => set({ components }),
   updateCard: (id, updates) =>
     set((state) => ({
       cards: state.cards.map((c) => (c.id === id ? { ...c, ...updates } : c))
     }))
 }));
 ```
+
+**Critical**: Components state is loaded from ProjectLauncher and must be available for Sidebar + Canvas rendering.
 
 ## IPC Communication
 

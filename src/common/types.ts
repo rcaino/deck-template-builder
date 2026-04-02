@@ -2,10 +2,10 @@
 
 export const DEFAULT_CANVAS_WIDTH = 1000;
 export const DEFAULT_CANVAS_HEIGHT = 1800;
-export const PIXELS_PER_CM = 200;
+export const DEFAULT_PIXELS_PER_CM = 200;
 export const GRID_SNAP = 10;
 
-export type DataType = "text" | "numeric" | "icon" | "image" | "sprite";
+export type DataType = "text" | "numeric" | "image" | "sprite";
 export type DataSource = "project" | "parent";
 
 export interface ComponentStyle {
