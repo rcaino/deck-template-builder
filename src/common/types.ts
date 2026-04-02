@@ -8,13 +8,13 @@ export const GRID_SNAP = 10;
 export type DataType = "text" | "numeric" | "image" | "sprite";
 export type DataSource = "project" | "parent";
 
-export interface ComponentStyle {
+export interface IComponentStyle {
   backgroundColor: string;
   border?: string;
   padding?: string;
 }
 
-export interface ComponentDefinition {
+export interface IComponentDefinition {
   id: string;
   name: string;
   type: DataType;
@@ -22,14 +22,14 @@ export interface ComponentDefinition {
   mappingKey: string; // The key in the JSON data
   position: { x: number; y: number };
   size: { width: number; height: number };
-  style: ComponentStyle;
+  style: IComponentStyle;
   isPrimitive: boolean;
-  children?: ComponentDefinition[]; // For grouping
+  children?: IComponentDefinition[]; // For grouping
 }
 
-export interface CardProject {
+export interface ICardProject {
   id: string;
   name: string;
   baseImage: string;
-  components: ComponentDefinition[];
+  components: IComponentDefinition[];
 }
