@@ -1,729 +1,749 @@
-# Deck Template Builder - Project Breakdown
+# Deck Template Builder - Breakdown Iterativo
 
-## Overview
+## 🎯 Filosofía
 
-- **Status**: Código base existente → refactor + completar
-- **Scope**: Full v1.0 con tests, config y documentación
-- **Strategy**: Backend + Frontend en paralelo
-- **Phases**: 4 (Setup → Parallel Dev → Integration → Polish)
+Cada iteración entrega **valor funcional visible** que puede ser testeado y demostrado. Los sprints están organizados para permitir trabajo paralelo sin bloqueos, comenzando con UI + tipos compartidos.
 
 ---
 
-## Phase 0: Foundation & Contracts
+## 📋 Hitos de Entrega
 
-**Duration**: 1-2 sprints | **Blocker for**: Fase 1  
-**Status**: ⭕ Not Started
+| Hito                         | Valor Entregado                                  | Prioridad   |
+| ---------------------------- | ------------------------------------------------ | ----------- |
+| **Foundation**               | Tipos + estructura + DbFactory                   | 🔴 BLOCKER  |
+| **Hito 1: UI Shell**         | App funcional con menú + sidebar                 | 🟠 CRITICAL |
+| **Hito 2: Project Creation** | Crear proyecto + Canvas Config dialog            | 🟠 CRITICAL |
+| **Hito 3: Fields Wizard**    | Definir campos (CRUD paso a paso)                | 🟠 CRITICAL |
+| **Hito 4: Components**       | Agregar componentes (imageOptions/spriteOptions) | 🟡 HIGH     |
+| **Hito 5: Asset Import**     | Subir imágenes + renderizar canvas               | 🟡 HIGH     |
+| **Hito 6: Export & Polish**  | Exportar template + tests + docs                 | 🟡 HIGH     |
 
-### 0.1 Common Layer - Types & Constants
+---
 
-- [ ] **common/types.ts** - Define all interfaces
-  - [ ] `ITemplate` - Template metadata (id, name, description)
-  - [ ] `IComponent` - Visual component (imageOptions OR spriteOptions type)
-    - [ ] `IComponentImageOptions` - Each value has different imagePath (no imageCoords)
-    - [ ] `IComponentSpriteOptions` - All values share same imagePath with imageCoords
-  - [ ] `IComponentValueImage` - For imageOptions type (value, label, imagePath)
-  - [ ] `IComponentValueSprite` - For spriteOptions type (value, label, imagePath, imageCoords REQUIRED)
-  - [ ] `IField` - Template field (id, name, type, position, style, validation)
-  - [ ] `ICanvasConfig` - Canvas dimensions (width, height, ppc)
-  - [ ] `ICTMManifest` - Project infrastructure manifest (version, structure paths, fileStructure validation, db config)
-  - [ ] `IDatabase` - DB adapter interface (query, insert, update, delete, close)
-  - [ ] `IDBConfig` - DB configuration (type: 'lowdb'|'mongodb', connection details)
-  - [ ] `IResponse<T>` - Response wrapper (success, data, error)
-  - [ ] `IImageCoords` - Image crop coordinates (x, y, width, height for sprite sheets)
-  - **Note**: NO ICard type (cards are outside our scope - user's responsibility)
-  - **Tests**: Unit tests for type integrity
+# 🏗️ Foundation Phase (Shared)
 
-- [ ] **common/constants.ts** - Fixed values
-  - [ ] `DEFAULT_CANVAS_WIDTH = 1000` (default canvas width when creating new project)
-  - [ ] `DEFAULT_CANVAS_HEIGHT = 1800` (default canvas height when creating new project)
-  - [ ] `DEFAULT_PPC = 96` (default pixels per centimeter)
-  - [ ] `DEFAULT_DB_TYPE = 'lowdb'`
+## F1: Common Types & Constants
+
+- [ ] **src/common/types.ts** - Define all interfaces
+  - [ ] `ITemplate` (id, name, description, version)
+  - [ ] `ICanvasConfig` (width, height, ppc)
+  - [ ] `IField` (id, name, type, position, style, validation)
+    - Types: "text" | "number" | "option"
+  - [ ] `IComponentValueImage` (value, label, imagePath)
+  - [ ] `IComponentValueSprite` (value, label, imageCoords)
+  - [ ] `IImageCoords` (x, y, width, height)
+  - [ ] `IComponentImageOptions` (type="imageOptions", position, zIndex, values[])
+  - [ ] `IComponentSpriteOptions` (type="spriteOptions", position, zIndex, imagePath, values[])
+  - [ ] `IComponent = IComponentImageOptions | IComponentSpriteOptions`
+  - [ ] `ICTMManifest` (version, structure, fileStructure, db config)
+  - [ ] `IDBConfig` (type, path OR connectionString)
+  - [ ] `IDatabase` (query, insert, update, delete, close)
+  - [ ] `IResponse<T>` (success, data, error)
+  - **Tests**: Type validation
+
+- [ ] **src/common/constants.ts**
+  - [ ] `DEFAULT_CANVAS_WIDTH = 1000`
+  - [ ] `DEFAULT_CANVAS_HEIGHT = 1800`
+  - [ ] `DEFAULT_PPC = 96`
   - [ ] `VALID_IMAGE_FORMATS = ['jpg', 'png', 'webp']`
-  - [ ] `RELATIVE_ASSET_PATH = 'assets/images'` (where component images are stored)
-  - **Note**: Canvas config is per-project in database (not global constants). Fields and components are user-defined.
+  - [ ] `RELATIVE_ASSET_PATH = 'assets/images'`
 
-### 0.2 Project Structure
+## F2: Directory Structure & Tsconfig
 
-- [ ] Create `/src/common/` directory
-- [ ] Create `/src/main/` directory tree (database, services, ipc)
-- [ ] Create `/src/renderer/src/` component tree (components, hooks, store)
-- [ ] Create `/src/preload/` bridge file
-- [ ] Validate tsconfig paths for imports
+- [ ] Create `/src/main/` tree
+  - `/database/` (DbFactory, adapters)
+  - `/services/` (ProjectLauncher, AssetManager, Packager)
+  - `/ipc/` (handlers)
+- [ ] Create `/src/renderer/src/` tree
+  - `/components/` (Canvas, Sidebar, Inspector, dialogs)
+  - `/hooks/` (useApi, useAssets)
+  - `/store/` (Zustand stores)
+  - `/assets/` (CSS)
+- [ ] Update `tsconfig.json` with path aliases:
+  - `@common` → `src/common`
+  - `@main` → `src/main`
+  - `@renderer` → `src/renderer/src`
 
----
-
-## Phase 1: Backend Layer
-
-### 1.1 Database Abstraction Layer
-
-**Blocker for**: IPC handlers (1.3)  
-**Tests Required**: Unit tests for each adapter
-
-#### 1.1.1 DbFactory
+## F3: Database Abstraction
 
 - [ ] **src/main/database/DbFactory.ts**
-  - [ ] Create static `create(config: IDBConfig): IDatabase`
-  - [ ] Support 'lowdb' case → new LowdbAdapter(config.path)
-  - [ ] Support 'mongodb' case → new MongoAdapter(config.connection)
-  - [ ] Error handling for unknown types
-  - [ ] Logging for adapter selection
-  - **Tests**: Factory pattern unit tests
-
-#### 1.1.2 Lowdb Adapter
+  - [ ] Static `create(config: IDBConfig): IDatabase`
+  - [ ] Support 'lowdb' → new LowdbAdapter
+  - [ ] Support 'mongodb' → new MongoAdapter
+  - **Tests**: Factory pattern
 
 - [ ] **src/main/database/LowdbAdapter.ts**
-  - [ ] Implement `IDatabase` interface
-  - [ ] `query(collection, filter): Promise<any[]>`
-  - [ ] `insert(collection, data): Promise<any>`
-  - [ ] `update(collection, id, data): Promise<void>`
-  - [ ] `delete(collection, id): Promise<void>`
-  - [ ] `close(): Promise<void>`
-  - [ ] Relative path validation (no absolute paths)
-  - **Tests**: CRUD operations, filtering, error cases
+  - [ ] Implement IDatabase interface
+  - [ ] `query(collection, filter)`
+  - [ ] `insert(collection, data)`
+  - [ ] `update(collection, id, data)`
+  - [ ] `delete(collection, id)`
+  - [ ] Relative path validation
+  - **Tests**: CRUD operations, path validation
 
-#### 1.1.3 MongoDB Adapter
-
-- [ ] **src/main/database/MongoAdapter.ts**
-  - [ ] Implement `IDatabase` interface
+- [ ] **src/main/database/MongoAdapter.ts** (dapat en Iter 5+)
+  - [ ] Implement IDatabase interface
   - [ ] Connection pooling
-  - [ ] Retry logic for network failures
-  - [ ] All methods from CRUD contract
-  - [ ] Index management for common queries
-  - **Tests**: Connection, CRUD, error recovery
-
-### 1.2 Service Layer
-
-**Blocker for**: IPC implementation (1.3)  
-**Tests Required**: Integration tests with DbFactory
-
-#### 1.2.1 ProjectLauncher Service
-
-- [ ] **src/main/services/ProjectLauncher.ts**
-  - [ ] Read project.ctm manifest from directory (infrastructure + fileStructure)
-  - [ ] Parse JSON and validate against ICTMManifest schema
-  - [ ] **Validate file structure** using fileStructure from manifest:
-    - [ ] For each component in fileStructure, check if folder exists
-    - [ ] For each expectedFile in component, check if image exists
-    - [ ] If image missing: Try to find external link (by component/value name), download, optimize, save
-    - [ ] If component folder missing: Create it (empty)
-    - [ ] Report missing images that cannot be auto-recovered
-  - [ ] Initialize database adapter from manifest config
-  - [ ] Load template definition from database:
-    - [ ] Load canvasConfig (width, height, ppc)
-    - [ ] Load template (metadata)
-    - [ ] Load all fields
-    - [ ] Load all components
-    - [ ] Load layout (if exists)
-  - [ ] Return initialized state: { canvasConfig, template, fields, components, layout, validationReport }
-  - [ ] Error handling for missing/corrupt .ctm, missing canvasConfig, DB connection failures
-  - **Tests**: Manifest parsing, structure validation, DB initialization, image recovery
-
-#### 1.2.2 AssetManager Service
-
-- [ ] **src/main/services/AssetManager.ts**
-  - [ ] `importComponentImage(file, componentName, value, projectPath)` - Convert + store
-    - Query database for component definition
-    - Validate component exists in database
-    - Validate value exists in component.values
-    - Convert to WebP (Sharp, quality 90, effort 6)
-    - Save to `assets/images/{componentName}/{value}.webp` (relative path)
-    - Return relative path
-  - [ ] `getComponentImages(componentName, projectPath)` - List images for component
-    - Scan assets/images/{componentName}/
-    - Return mapping: { [value]: imagePath }
-  - [ ] `listAllComponentImages(projectPath)` - Full asset map
-    - Return: { [componentName]: { [value]: imagePath, ... }, ... }
-  - [ ] Maintain relative paths (critical for portability)
-  - [ ] Validate image format before conversion
-  - **Tests**: WebP conversion, path validation, DB queries, batch operations
-
-#### 1.2.3 Packager Service
-
-- [ ] **src/main/services/Packager.ts**
-  - [ ] ZIP project folder (all assets + database)
-  - [ ] Unzip and restore project structure
-  - [ ] Maintain relative paths during pack/unpack
-  - [ ] Handle large files efficiently
-  - **Tests**: Pack/unzip integrity, structure preservation
-
-### 1.3 IPC Handlers
-
-**Depends on**: 1.1, 1.2  
-**Tests Required**: E2E tests via IPC
-
-- [ ] **src/main/ipc/handlers.ts**
-  - [ ] `project:load` → ProjectLauncher.execute()
-  - [ ] `project:save` → Save cards to database
-  - [ ] `assets:list` → AssetManager.listByCategory()
-  - [ ] `assets:import` → AssetManager.importAndOptimize()
-  - [ ] `project:export` → Packager.zip()
-  - [ ] Response wrapper: `{ success, data?, error? }`
-  - [ ] Validation middleware for input
-  - [ ] Error logging and user-friendly errors
-  - **Tests**: Handler invocation, response format, error cases
-
-### 1.4 Main Process Entry
-
-- [ ] **src/main/index.ts**
-  - [ ] Create Electron window (1000x1800 design area reference)
-  - [ ] Register asset:// protocol
-  - [ ] Map asset:// → projects/{projectName}/assets/images/
-  - [ ] Load preload bridge
-  - [ ] Initialize IPC handlers
-  - [ ] Handle app lifecycle (ready, close, etc.)
-  - **Tests**: Protocol registration, window creation
+  - [ ] All CRUD methods
+  - **Tests**: Connection, CRUD
 
 ---
 
-## Phase 2: Frontend Layer
+# 🎨 Hito 1: UI Shell & Navigation
 
-### 2.1 State Management
+**Objetivo**: Aplicación vacía funcional con estructura principal visible  
+**Entregable**: App puede abrirse, navegar menú, ver sidebar vacío
 
-**Blocker for**: All components (2.2+)  
-**Tests Required**: Unit tests for store mutations
-
-#### 2.1.1 Template Store (Zustand)
-
-- [ ] **src/renderer/src/store/useTemplateStore.ts**
-  - [ ] State: `template: ITemplate | null` (metadata)
-  - [ ] State: `fields: IField[]` (all template fields)
-  - [ ] State: `components: IComponent[]` (all template components)
-  - [ ] State: `selectedFieldId: string | null` (for editing)
-  - [ ] State: `selectedComponentId: string | null` (for editing)
-  - [ ] Action: `loadTemplate(template, fields, components)` (called from ProjectLauncher)
-  - [ ] Action: `addField(field: IField)` + API call to save
-  - [ ] Action: `updateField(fieldId, updates)` + API call
-  - [ ] Action: `removeField(fieldId)` + API call
-  - [ ] Action: `addComponent(component: IComponent)` + API call to save
-  - [ ] Action: `updateComponent(componentId, updates)` + API call
-  - [ ] Action: `removeComponent(componentId)` + API call
-  - [ ] Action: `resetStore()`
-  - [ ] Devtools integration for debugging
-  - **Tests**: Store mutations, field/component CRUD, API integration
-
-#### 2.1.2 Dialog Store (Zustand)
-
-- [ ] **src/renderer/src/store/useDialogStore.ts**
-  - [ ] State: `openDialogs: { [key: string]: any }` (dialog type → data)
-  - [ ] Action: `openDialog(type: DialogType, data?: any)`
-  - [ ] Action: `closeDialog(type: DialogType)`
-  - [ ] Action: `updateDialogData(type, updates)`
-  - [ ] Helper: `isDialogOpen(type): boolean`
-  - [ ] Support multiple dialogs stacked (e.g., confirm before close)
-  - **Tests**: Dialog lifecycle, stacking, data persistence
-
-### 2.2 Hooks
-
-**Depends on**: 2.1  
-**Tests Required**: Hook tests with mock IPC
-
-#### 2.2.1 useApi Hook
-
-- [ ] **src/renderer/src/hooks/useApi.ts**
-  - [ ] Wrap `window.api.invoke()`
-  - [ ] Return `{ invoke: (channel, params) => Promise<IResponse> }`
-  - [ ] Error handling and retry logic
-  - [ ] Loading state management
-  - **Tests**: IPC invocation, error handling
-
-#### 2.2.2 useCardStore Hook
-
-- [ ] Already defined in 2.1 (store access)
-- [ ] Test selector pattern (not full store mutation)
-
-#### 2.2.3 useAssets Hook (optional)
-
-- [ ] **src/renderer/src/hooks/useAssets.ts**
-  - [ ] Fetch assets by category via IPC
-  - [ ] Cache results to avoid re-fetching
-  - [ ] Handle image load failures
-  - **Tests**: Caching, error recovery
-
-### 2.3 Frontend Components
-
-**Depends on**: 2.1, 2.2  
-**Tests Required**: Component snapshot + interaction tests
-
-#### 2.3.1 Canvas Component
-
-- [ ] **src/renderer/src/components/canvas/Canvas.tsx**
-  - [ ] **Read canvas dimensions** from `useTemplateStore.canvasConfig` (width, height, ppc)
-  - [ ] Container size = `canvasConfig.width × canvasConfig.height` px
-  - [ ] Render TemplatePreview showing fields + components positioned
-  - [ ] Empty state if no template loaded
-  - [ ] Responsive scaling (sm/md/lg preview with aspect-ratio)
-  - [ ] Handle asset:// protocol image loading
-  - **Tests**: Dynamic dimensions, state binding, empty state, aspect ratio
-
-#### 2.3.2 TemplatePreview Sub-component
-
-- [ ] **src/renderer/src/components/canvas/TemplatePreview.tsx**
-  - [ ] Accept `template, fields, components` props
-  - [ ] **Render template visualization**:
-    - Loop through components: render each positioned image
-    - Loop through fields: render each with position + style
-    - Apply conditional logic (if field exists, show component)
-  - [ ] Render each field with FieldRenderer
-  - [ ] Memoization to prevent unnecessary re-renders
-  - [ ] Error handling for missing component images (graceful degradation)
-  - [ ] Show grid/guidelines for positioning (optional)
-  - **Tests**: Props validation, template rendering, missing asset handling
-
-#### 2.3.3 FieldRenderer Sub-component
-
-- [ ] **src/renderer/src/components/canvas/FieldRenderer.tsx**
-  - [ ] Accept `IField` prop
-  - [ ] Apply CSS styles (fontSize, color, bold, align)
-  - [ ] Responsive text sizing
-  - [ ] Clickable for inspector selection
-  - **Tests**: Style application, interactions
-
-#### 2.3.4 Sidebar Component
-
-- [ ] **src/renderer/src/components/sidebar/Sidebar.tsx**
-  - [ ] **Fields section**: List of template fields
-    - [ ] [+] Add field button
-    - [ ] Display each field: name, type, position, style
-    - [ ] Edit/Delete buttons
-    - [ ] Click to select for canvas preview
-  - [ ] **Components section**: List of template components
-    - [ ] [+] Add component button
-    - [ ] Display each component: name, type, values count
-    - [ ] Edit/Delete buttons
-    - [ ] Click to select for canvas preview
-  - [ ] **Assets section**: Asset management
-    - [ ] Component selector (todo add assets to which component?)
-    - [ ] Value selector (add asset for which value?)
-    - [ ] [+] Upload button
-    - [ ] List of uploaded assets
-  - [ ] Responsive layout
-  - **Tests**: Field/component listing, add/edit/delete UI, asset uploading
-
-#### 2.3.5 Inspector Component
-
-- [ ] **src/renderer/src/components/inspector/Inspector.tsx**
-  - [ ] Display editor for selected item (field or component)
-  - [ ] **If field selected**: Field editor
-    - [ ] Text input for field.name
-    - [ ] Select for field.type (text, number, select, image)
-    - [ ] Positioning controls (X, Y, Width, Height)
-    - [ ] Style controls: fontSize, fontFamily, color, bold, align
-    - [ ] Validation rules (minLength, maxLength, pattern)
-  - [ ] **If component selected**: Component editor
-    - [ ] Text input for component.name
-    - [ ] Select for component.type (image, shape, text)
-    - [ ] List of component.values with editors
-    - [ ] Positioning for each value variant
-    - [ ] Condition editor (if field exists, if field = value)
-  - [ ] Live canvas update on change
-  - [ ] Undo/Redo (optional, nice-to-have)
-  - [ ] Save/Cancel buttons (or auto-save)
-  - **Tests**: Field editing, component editing, live preview, persistence
-
-#### 2.3.6 Dialog/Modal Components
-
-**Responsabilidad**: Encapsular configuraciones complejas en UX limpia
-
-- [ ] **src/renderer/src/components/dialogs/DialogProvider.tsx**
-  - [ ] Context provider for dialog state (open, type, data)
-  - [ ] Manage stack of dialogs (support multiple simultaneous?)
-  - [ ] Methods: `openDialog(type, data)`, `closeDialog()`
-  - [ ] Overlay dismissal handling (click outside, ESC key)
-  - **Tests**: State management, event handling
-
-- [ ] **src/renderer/src/components/dialogs/BaseDialog.tsx**
-  - [ ] Reusable dialog wrapper (header, content, footer areas)
-  - [ ] Overlay with blur effect + click-outside dismiss
-  - [ ] Header with title + close button (X)
-  - [ ] Footer with action buttons (Cancel, Save/Confirm)
-  - [ ] Keyboard shortcut: ESC → close, ENTER → confirm
-  - [ ] Focus trap (tab within dialog only)
-  - [ ] Accessibility: aria-modal, aria-labelledby
-  - **Tests**: Keyboard navigation, focus management, dismissal
-
-- [ ] **src/renderer/src/components/dialogs/CanvasConfigDialog.tsx**
-  - [ ] Edit canvas dimensions (width, height, ppc)
-  - [ ] Input validation (positive numbers, reasonable defaults)
-  - [ ] Live preview of aspect ratio change
-  - [ ] Buttons: Reset to Default (1000x1800, 96 ppc), Cancel, Save
-  - [ ] Tooltip: "Changes will reflow card layout"
-  - [ ] Accessible form with labels + help text
-  - **Tests**: Input validation, preview updates, save/cancel
-
-- [ ] **src/renderer/src/components/dialogs/FieldsWizardDialog.tsx** ⭐ NEW
-  - [ ] **Step 1**: Add first field
-    - [ ] Field name input
-    - [ ] Field type selector: text, number, option
-    - [ ] Conditional fields based on type:
-      - [ ] **text**: validation (minLength, maxLength, pattern)
-      - [ ] **number**: validation (min, max)
-      - [ ] **option**: Add option entries (value + label)
-    - [ ] Position selector (X, Y, W, H)
-    - [ ] Style editor (fontSize, fontFamily, color, bold, align)
-    - [ ] Add Field / Cancel buttons
-  - [ ] **Step N**: After each field, offer "Add Next Field" or "Finish Wizard"
-  - [ ] **Summary**: Show added fields before completion
-  - [ ] All fields saved to DB at completion
-  - [ ] **Tests**: Field creation, validation, option management, step navigation
-
-- [ ] **src/renderer/src/components/dialogs/ProjectSettingsDialog.tsx**
-  - [ ] Template metadata editing
-    - [ ] Project name
-    - [ ] Project description
-    - [ ] Template version
-  - [ ] Save/Cancel buttons
-  - [ ] **Tests**: Form submission, persistence, validation
-  - [ ] **Note**: Canvas configuration edited in CanvasConfigDialog
-
-- [ ] **src/renderer/src/components/dialogs/AssetImportDialog.tsx**
-  - [ ] Component selector dropdown (from useTemplateStore.components)
-  - [ ] Component type display (imageOptions or spriteOptions)
-  - [ ] **If imageOptions**:
-    - [ ] Value selector (from values array)
-    - [ ] Single file upload
-  - [ ] **If spriteOptions**:
-    - [ ] Sprite sheet file upload
-    - [ ] Image crop tool (visual imageCoords editor)
-    - [ ] Preview of cropped regions
-  - [ ] Drag-and-drop zone or file picker
-  - [ ] File validation (image format: jpg, png, webp)
-  - [ ] Conversion to WebP (Sharp, quality 90)
-  - [ ] Progress indicator for conversion
-  - [ ] Error handling per file (format, size, conversion)
-  - [ ] Success confirmation: "Image saved to assets/images/{component}/{value}.webp"
-  - [ ] Auto-close on success
-  - **Tests**: File handling, component+value validation, upload, error states
-
-#### 2.3.7 App.tsx Main Layout
-
-- [ ] **src/renderer/src/App.tsx**
-  - [ ] Three-column layout: Sidebar | Canvas | Inspector
-  - [ ] Top navbar with project name + menu
-  - [ ] Menu: File (New, Open, Save, Export)
-  - [ ] Load project on app start
-  - [ ] Sync state to backend on changes (auto-save)
-  - **Tests**: Layout rendering, menu handler delegation
-
-### 2.4 Frontend Styling
-
-- [ ] **src/renderer/assets/main.css** - Tailwind imports
-- [ ] **src/renderer/assets/base.css** - Global utilities
-- [ ] Configure Tailwind v4 for custom canvas sizing
-- [ ] Responsive breakpoints (sm, md, lg)
-- [ ] **Tests**: Build validation, CSS class coverage
-
----
-
-## Phase 3: Integration & E2E
-
-### 3.1 Preload Bridge
+## B1.1: Preload Bridge
 
 - [ ] **src/preload/index.ts**
-  - [ ] Expose `window.api.invoke(channel, params)`
-  - [ ] Type safety for channel names
-  - [ ] Error wrapping
-  - **Tests**: Bridge invocation, type checking
+  - [ ] Expose `window.api.invoke(channel, params): Promise<IResponse>`
+  - [ ] Basic IPC error wrapping
+  - **Tests**: Bridge invocation
 
-### 3.2 IPC Integration Tests
+## B1.2: Main Process Basic
 
-- [ ] Test project:load → full flow (Sidebar → Canvas → Inspector)
-- [ ] Test project:save → database persistence
-- [ ] Test assets:import → WebP conversion → Sidebar display
-- [ ] Test asset:// protocol → image loading in Canvas
-- [ ] End-to-end: Load project → Edit card → Save → Reload
-- [ ] **Tests**: E2E scenarios, state persistence
+- [ ] **src/main/index.ts**
+  - [ ] Create Electron window (900x700 initial)
+  - [ ] Load preload bridge
+  - [ ] Register ipcMain handlers (stub: project:ping → pong)
+  - [ ] No database yet - just UI frame
+  - **Tests**: Window creation, IPC connection test
 
-### 3.3 Error Recovery
+## F1.1: Zustand Store (Shell)
 
-- [ ] Handle corrupted project.ctm
-- [ ] Handle missing assets directory
-- [ ] Handle database connection failures
-- [ ] Handle image conversion failures
-- [ ] User-friendly error messages in Inspector
-- [ ] **Tests**: Error scenarios, recovery
+- [ ] **src/renderer/src/store/useTemplateStore.ts**
+  - State: `isLoading: boolean`
+  - State: `error: string | null`
+  - Action: `setLoading(bool)`
+  - Action: `setError(msg)`
+  - **Tests**: State mutations
 
-### 3.4 Performance Testing
+- [ ] **src/renderer/src/store/useDialogStore.ts**
+  - State: `openDialogs: { [key: string]: boolean }`
+  - Action: `openDialog(type)`
+  - Action: `closeDialog(type)`
+  - **Tests**: Dialog state lifecycle
 
-- [ ] Canvas rendering with 100+ fields
-- [ ] Asset list with 500+ images
-- [ ] Large image conversion (5MB+)
-- [ ] Profile with DevTools
-- [ ] **Tests**: Benchmarks, profiling
+## F1.2: Layout Components
+
+- [ ] **src/renderer/src/components/App.tsx** - Main layout shell
+  - Three-column: Sidebar | Canvas | Inspector
+  - Top navbar with project name + menu
+  - Grid layout (tailwind)
+  - Menu items: File (New, Open, Export), Help
+  - No functionality yet - just DOM structure
+  - **Tests**: Layout rendering
+
+- [ ] **src/renderer/src/components/Navbar.tsx**
+  - Title: "Deck Template Builder"
+  - Menu: File dropdown (stub handlers)
+  - Status indicator: "No project loaded"
+  - **Tests**: Menu button rendering
+
+- [ ] **src/renderer/src/components/Canvas.tsx**
+  - Empty box (1000x1800 px ratio aspect-ratio)
+  - "Create a project to begin" placeholder
+  - Responsive sizing
+  - **Tests**: Responsive dimensions
+
+- [ ] **src/renderer/src/components/Sidebar.tsx**
+  - Empty sections: Fields, Components, Assets
+  - Tab structure (if applicable)
+  - "Ready for project" message
+  - **Tests**: Section rendering
+
+- [ ] **src/renderer/src/components/Inspector.tsx**
+  - Empty form area
+  - "Select a field or component to edit" message
+  - **Tests**: Empty state
+
+## F1.3: Styling & Tailwind Setup
+
+- [ ] Configure Tailwind CSS v4
+- [ ] Global CSS imports
+- [ ] Custom color palette
+- [ ] Responsive breakpoints
+
+## F1.4: Tests
+
+- [ ] Component snapshot tests (App, Navbar, Canvas, Sidebar, Inspector)
+- [ ] Store tests (mutations)
+- [ ] IPC bridge test
+
+**✅ Hito 1 Completado**: App abre → UI visible → menú responsive
 
 ---
 
-## Phase 4: Testing, Docs & Polish
+# 📁 Hito 2: Project Creation & Canvas Config
 
-### 4.1 Test Coverage
+**Objetivo**: Crear nuevo proyecto con diálogo de canvas config  
+**Entregable**: Nuevo proyecto → project.ctm + base DB creada → Canvas config mostrado
 
-**Minimum Target**: 70% coverage
+## B2.1: ProjectLauncher Service
 
-- [ ] Unit tests for /common (types, constants)
-- [ ] Unit tests for DbFactory + adapters
-- [ ] Unit tests for Services (ProjectLauncher, AssetManager, Packager)
-- [ ] Unit tests for Zustand store
-- [ ] Component tests for Canvas, Sidebar, Inspector
-- [ ] Integration tests for IPC handlers
-- [ ] E2E tests for critical user flows
-- [ ] **Setup**: Jest + React Test Library + Electron test runner
+- [ ] **src/main/services/ProjectLauncher.ts**
+  - [ ] `createNewProject(projectPath, canvasWidthHeight, ppc)`
+    - [ ] Create folder structure: assets/images, data/
+    - [ ] Create project.ctm manifest (version, structure, db config)
+    - [ ] Initialize database with schema (collections: canvasConfig, template, fields, components)
+    - [ ] Save canvasConfig to database
+    - [ ] Return { canvasConfig, template, fields, components }
+  - [ ] `loadProject(projectPath)`
+    - [ ] Read project.ctm
+    - [ ] Validate ICTMManifest schema
+    - [ ] Initialize DbFactory with db config
+    - [ ] Load canvasConfig, template, fields, components from DB
+    - [ ] Return { canvasConfig, template, fields, components }
+  - **Tests**: Project creation (folder structure), manifest validation, DB initialization
 
-### 4.2 Configuration Files
+## B2.2: IPC Handlers
 
-- [ ] **.env.example** - DB_TYPE, DB_PATH, LOG_LEVEL
-- [ ] **tsconfig.json** - Path mapping for @common, @main, @renderer
-- [ ] **.eslintrc** - Consistent code style
-- [ ] **jest.config.js** - Test setup
-- [ ] **Electron security**: CSP headers, preload isolation
+- [ ] **src/main/ipc/handlers.ts**
+  - [ ] `project:create` (projectPath, width, height, ppc)
+    - ProjectLauncher.createNewProject()
+    - Return initialized state
+  - [ ] `project:load` (projectPath)
+    - ProjectLauncher.loadProject()
+    - Return initialized state
+  - [ ] Response wrapper: `{ success: bool, data?, error? }`
+  - **Tests**: Handler invocation, response format
 
-### 4.3 Documentation
+## F2.1: Dialogs Infrastructure
 
-- [ ] **docs/ARCHITECTURE.md** - Layer overview + design decisions
+- [ ] **src/renderer/src/components/dialogs/DialogProvider.tsx**
+  - Context: `{ openDialogs, openDialog(), closeDialog() }`
+  - Manage dialog stack
+  - Support multiple simultaneous dialogs
+  - **Tests**: Context provider
+
+- [ ] **src/renderer/src/components/dialogs/BaseDialog.tsx**
+  - Reusable wrapper: header + content + footer
+  - Overlay with blur
+  - Close button (X)
+  - Focus trap (TAB within dialog)
+  - ESC key closes
+  - Click-outside dismissal
+  - Keyboard accessible (aria-modal, aria-labelledby)
+  - **Tests**: Focus trap, keyboard shortcuts, dismissal
+
+## F2.2: CanvasConfigDialog
+
+- [ ] **src/renderer/src/components/dialogs/CanvasConfigDialog.tsx**
+  - [ ] Input fields: Width, Height, PPC
+  - [ ] Validation: positive numbers, reasonable defaults
+  - [ ] Live aspect ratio preview
+  - [ ] Buttons: "Reset to Default", "Cancel", "Create Project" (or "Save")
+  - [ ] On save: API call to `project:create`
+  - [ ] On success: Close dialog, load template state
+  - **Tests**: Input validation, form submission, error handling
+
+## F2.3: File Menu Actions
+
+- [ ] **src/renderer/src/components/Navbar.tsx** - Update
+  - [ ] "File → New Project" → Open CanvasConfigDialog
+  - [ ] "File → Open Project" → Folder picker (TODO: Iter 4)
+  - **Tests**: Menu handlers
+
+## F2.4: Store Updates
+
+- [ ] **src/renderer/src/store/useTemplateStore.ts** - Extend
+  - State: `canvasConfig: ICanvasConfig | null`
+  - State: `template: ITemplate | null`
+  - State: `fields: IField[]`
+  - State: `components: IComponent[]`
+  - Action: `loadTemplate(state)`
+  - Action: `resetStore()`
+  - **Tests**: Store state management, action handlers
+
+## F2.5: Hooks
+
+- [ ] **src/renderer/src/hooks/useApi.ts**
+  - Wrapper: `invoke(channel, params) → Promise<IResponse>`
+  - Error handling and retry logic
+  - **Tests**: IPC invocation, error handling
+
+## F2.6: Canvas Component Update
+
+- [ ] **src/renderer/src/components/Canvas.tsx** - Update
+  - Read `canvasConfig` from store
+  - Display canvas with correct dimensions (aspect-ratio)
+  - Show placeholder if no template loaded
+  - **Tests**: Dynamic dimensions from store
+
+## F2.7: Tests
+
+- [ ] E2E: New Project flow (dialog → project created → canvas visible)
+- [ ] ProjectLauncher tests (creation, loading)
+- [ ] Dialog tests (focus, submission)
+- [ ] Store tests (template loading)
+
+**✅ Hito 2 Completado**: Crear proyecto nuevo → Dialog canvas config → Canvas muestra dimensiones correctas
+
+---
+
+# 🧩 Hito 3: Fields Wizard (Multi-step)
+
+**Objetivo**: Definir campos del template paso a paso  
+**Entregable**: Fields wizard completo → CRUD de fields → Persistencia en DB
+
+## B3.1: Extend ProjectLauncher
+
+- [ ] `addField(projectPath, field: IField) → Promise<IField>`
+- [ ] `updateField(projectPath, fieldId, updates) → Promise<void>`
+- [ ] `removeField(projectPath, fieldId) → Promise<void>`
+- **Tests**: Field CRUD operations in DB
+
+## B3.2: IPC Handlers
+
+- [ ] **src/main/ipc/handlers.ts** - Extend
+  - [ ] `field:add` (projectPath, field)
+  - [ ] `field:update` (projectPath, fieldId, updates)
+  - [ ] `field:remove` (projectPath, fieldId)
+  - **Tests**: Handler invocation, DB updates
+
+## F3.1: FieldsWizardDialog (Multi-step)
+
+- [ ] **src/renderer/src/components/dialogs/FieldsWizardDialog.tsx**
+  - **Step 1: Field Definition**
+    - [ ] Input: Field name
+    - [ ] Select: Field type (text, number, option)
+    - [ ] Conditional inputs based on type:
+      - **text**: minLength, maxLength, pattern (regex)
+      - **number**: min, max value
+      - **option**: Add option entries (value + label)
+    - [ ] Action: "Add Option" button (for option type)
+    - [ ] Option list with delete buttons
+  - **Step 2: Positioning & Style**
+    - [ ] Position inputs: X, Y, Width, Height
+    - [ ] Style inputs: fontSize, fontFamily, color, bold, align
+    - [ ] Live preview of text styling
+  - **Step 3: Summary**
+    - [ ] Show added fields so far
+    - [ ] "Add Another Field" or "Finish Wizard"
+  - [ ] On finish: Save all fields to DB via API
+  - [ ] UI flow: Step 1 → Step 2 → Step 3 → (repeat 1-2 or Finish)
+  - **Tests**: Multi-step navigation, field creation, validation, option management
+
+## F3.2: Sidebar Update (Fields Tab)
+
+- [ ] **src/renderer/src/components/Sidebar.tsx** - Extend
+  - **Fields Tab**:
+    - [ ] List all fields (from store)
+    - [ ] Each field shows: name, type, position
+    - [ ] [+] "Add Field" button → Opens FieldsWizardDialog
+    - [ ] [Edit], [Delete] buttons per field
+    - [ ] Selectable (highlight to edit in Inspector)
+  - **Tests**: Field listing, button handlers
+
+## F3.3: Inspector Update (Field Editor)
+
+- [ ] **src/renderer/src/components/Inspector.tsx** - Extend
+  - [ ] When field selected:
+    - [ ] Display field.name, field.type
+    - [ ] Editable position (X, Y, W, H)
+    - [ ] Editable style (fontSize, fontFamily, color, bold, align)
+    - [ ] Editable validation rules
+    - [ ] Live preview of styled field name on canvas
+    - [ ] [Save Changes], [Delete Field], [Cancel] buttons
+  - **Tests**: Field editing, live preview, persistence
+
+## F3.4: Canvas Preview (Fields)
+
+- [ ] **src/renderer/src/components/Canvas.tsx** - Extend
+  - [ ] Create `TemplatePreview.tsx` sub-component
+    - [ ] Loop through store.fields
+    - [ ] Render each field with position + style applied
+    - [ ] Render placeholder text (field.name)
+    - [ ] Clickable → Select in Inspector
+  - [ ] Responsive scaling
+  - **Tests**: Field rendering, positioning
+
+## F3.5: Store Updates (Fields)
+
+- [ ] **src/renderer/src/store/useTemplateStore.ts** - Extend
+  - Action: `addField(field)` + API call
+  - Action: `updateField(fieldId, updates)` + API call
+  - Action: `removeField(fieldId)` + API call
+  - Action: `selectField(fieldId)`
+  - State: `selectedFieldId`
+  - **Tests**: Field CRUD in store, API integration
+
+## F3.6: Tests
+
+- [ ] E2E: Add field → Edit in inspector → Save → Reload project
+- [ ] FieldsWizardDialog: Multi-step navigation, validation
+- [ ] Store: Field CRUD operations
+- [ ] Canvas: Field rendering with correct styling
+
+**✅ Hito 3 Completado**: Crear fields via wizard → Ver en canvas → Editar en inspector
+
+---
+
+# 🖼️ Hito 4: Components Management
+
+**Objetivo**: Agregar componentes (imageOptions/spriteOptions)  
+**Entregable**: Component CRUD → Distinción imageOptions vs spriteOptions → Link a fields
+
+## B4.1: Extend ProjectLauncher
+
+- [ ] `addComponent(projectPath, component: IComponent) → Promise<IComponent>`
+- [ ] `updateComponent(projectPath, componentId, updates) → Promise<void>`
+- [ ] `removeComponent(projectPath, componentId) → Promise<void>`
+- [ ] `getComponentValues(projectPath, componentId) → Promise<string[]>`
+- **Tests**: Component CRUD in DB
+
+## B4.2: IPC Handlers
+
+- [ ] **src/main/ipc/handlers.ts** - Extend
+  - [ ] `component:add` (projectPath, component)
+  - [ ] `component:update` (projectPath, componentId, updates)
+  - [ ] `component:remove` (projectPath, componentId)
+  - [ ] `component:values` (projectPath, componentId)
+
+## F4.1: ComponentDialog
+
+- [ ] **src/renderer/src/components/dialogs/ComponentDialog.tsx**
+  - [ ] Step 1: Component metadata
+    - [ ] Name input
+    - [ ] Type selector: imageOptions OR spriteOptions
+    - [ ] Link to field dropdown (from store.fields)
+  - [ ] Step 2: Positioning
+    - [ ] Position: X, Y, Width, Height
+    - [ ] ZIndex input
+  - [ ] Step 3: Values definition
+    - [ ] **If imageOptions**:
+      - [ ] Add value entries (value + label)
+      - [ ] List/edit/delete values
+    - [ ] **If spriteOptions**:
+      - [ ] Add value entries (value + label)
+      - [ ] Will add imageCoords during asset import (Iter 5)
+  - [ ] On finish: Save component to DB
+  - **Tests**: Component creation, type selection, value management
+
+## F4.2: Sidebar Update (Components Tab)
+
+- [ ] **src/renderer/src/components/Sidebar.tsx** - Extend
+  - **Components Tab**:
+    - [ ] List all components (from store)
+    - [ ] Each component shows: name, type, position, values count
+    - [ ] [+] "Add Component" button → Opens ComponentDialog
+    - [ ] [Edit], [Delete] buttons per component
+    - [ ] Selectable (highlight to edit)
+  - **Tests**: Component listing
+
+## F4.3: Inspector Update (Component Editor)
+
+- [ ] **src/renderer/src/components/Inspector.tsx** - Extend
+  - [ ] When component selected:
+    - [ ] Display component.name, component.type
+    - [ ] Editable position (X, Y, W, H)
+    - [ ] Editable zIndex
+    - [ ] Show linked field
+    - [ ] List/edit/delete values (conditional rendering by type)
+    - [ ] [Save Changes], [Delete Component], [Cancel] buttons
+  - **Tests**: Component editing
+
+## F4.4: Canvas Preview (Components)
+
+- [ ] **src/renderer/src/components/canvas/TemplatePreview.tsx** - Extend
+  - [ ] Loop through store.components
+  - [ ] For each component: render placeholder box (colored)
+  - [ ] Position at component.position
+  - [ ] Show component.name as label
+  - [ ] Clickable → Select in Inspector
+  - **Tests**: Component rendering
+
+## F4.5: Store Updates (Components)
+
+- [ ] **src/renderer/src/store/useTemplateStore.ts** - Extend
+  - Action: `addComponent(component)` + API call
+  - Action: `updateComponent(componentId, updates)` + API call
+  - Action: `removeComponent(componentId)` + API call
+  - Action: `selectComponent(componentId)`
+  - State: `selectedComponentId`
+
+## F4.6: Tests
+
+- [ ] E2E: Add component → Link to field → Edit → Save
+- [ ] ComponentDialog: Type selection (imageOptions vs spriteOptions)
+- [ ] Store: Component CRUD
+- [ ] Canvas: Component positioning
+
+**✅ Hito 4 Completado**: Crear componentes → Link a fields → Ver en canvas como placeholders
+
+---
+
+# 🎨 Hito 5: Asset Import & Canvas Rendering
+
+**Objetivo**: Subir imágenes → Renderizar canvas con assets reales  
+**Entregable**: Asset import → Conversión a WebP → Canvas muestra imágenes reales
+
+## B5.1: AssetManager Service
+
+- [ ] **src/main/services/AssetManager.ts**
+  - [ ] `importComponentImage(file, componentName, value, projectPath)`
+    - [ ] Validate component exists in DB
+    - [ ] Validate value exists in component.values
+    - [ ] Convert to WebP (Sharp, quality 90, effort 6)
+    - [ ] Save to `assets/images/{componentName}/{value}.webp`
+    - [ ] Return relative path
+  - [ ] `getComponentImages(componentName, projectPath)`
+    - [ ] Return { [value]: imagePath, ... }
+  - [ ] `listAllComponentImages(projectPath)`
+    - [ ] Return { [componentName]: { [value]: imagePath }, ... }
+  - [ ] Maintain relative paths (portability critical)
+  - **Tests**: WebP conversion, path validation, file I/O
+
+## B5.2: Asset Protocol
+
+- [ ] **src/main/index.ts** - Extend
+  - [ ] Register `asset://` protocol
+  - [ ] Map `asset://{componentName}/{value}.webp` → `projects/{projectName}/assets/images/{componentName}/{value}.webp`
+  - [ ] Serve WebP images to renderer
+  - **Tests**: Protocol registration, asset loading
+
+## B5.3: IPC Handlers
+
+- [ ] **src/main/ipc/handlers.ts** - Extend
+  - [ ] `assets:import` (file, componentName, value, projectPath)
+    - [ ] AssetManager.importComponentImage()
+    - [ ] Return asset path
+  - [ ] `assets:list` (projectPath)
+    - [ ] AssetManager.listAllComponentImages()
+    - [ ] Return asset map
+
+## F5.1: AssetImportDialog
+
+- [ ] **src/renderer/src/components/dialogs/AssetImportDialog.tsx**
+  - [ ] Component selector dropdown (from store.components)
+  - [ ] Value selector (from selected component.values)
+  - [ ] Component type display (imageOptions vs spriteOptions)
+  - [ ] **If imageOptions**:
+    - [ ] Single file upload
+    - [ ] Drag-and-drop zone
+  - [ ] **If spriteOptions**:
+    - [ ] Single sprite sheet file upload
+    - [ ] (ImageCoords editor in Iter 5+ enhancement)
+  - [ ] File validation (jpg, png, webp only)
+  - [ ] Progress indicator (WebP conversion)
+  - [ ] Success message: "Asset saved to assets/images/..."
+  - [ ] Auto-close on success
+  - **Tests**: File upload, component validation, WebP conversion
+
+## F5.2: Sidebar Update (Assets Tab)
+
+- [ ] **src/renderer/src/components/Sidebar.tsx** - Extend
+  - **Assets Tab**:
+    - [ ] List uploaded assets by component
+    - [ ] Each asset shows: componentName/value - imagePath
+    - [ ] [+] "Import Asset" button → Opens AssetImportDialog
+    - [ ] [Replace], [Delete] buttons per asset
+    - [ ] Thumbnail preview (lazy loaded)
+  - **Tests**: Asset listing, button handlers
+
+## F5.3: Canvas Rendering (Real Images)
+
+- [ ] **src/renderer/src/components/canvas/TemplatePreview.tsx** - Extend
+  - [ ] For each component in store.components:
+    - [ ] Check if component has type="imageOptions" or "spriteOptions"
+    - [ ] **If imageOptions**: Load image from `asset://{component.name}/{value}.webp`
+    - [ ] **If spriteOptions**: Load sprite, crop using imageCoords, render cropped region
+    - [ ] Position at component.position with component.zIndex
+    - [ ] Render fields on top (or according to zIndex)
+    - [ ] Error handling for missing images (show placeholder)
+  - [ ] Render in correct order by zIndex
+  - [ ] Memoization to prevent re-renders
+  - **Tests**: Image loading, positioning, zIndex ordering, error handling
+
+## F5.4: Store Updates (Assets)
+
+- [ ] **src/renderer/src/store/useTemplateStore.ts** - Extend (optional)
+  - State: `assets: { [componentName]: { [value]: imagePath } }`
+  - Action: `loadAssets(assetMap)`
+  - Action: `addAsset(componentName, value, imagePath)`
+  - **Tests**: Asset state management
+
+## F5.5: Tests
+
+- [ ] E2E: Import asset → See on canvas with correct position
+- [ ] AssetManager: WebP conversion, path validation
+- [ ] AssetImportDialog: File upload, validation
+- [ ] Canvas: Image loading and positioning, zIndex ordering
+- [ ] Asset protocol: Serves images correctly
+
+**✅ Hito 5 Completado**: Subir imágenes → Canvas muestra imágenes reales → Preview completo del template
+
+---
+
+# 📦 Hito 6: Export & Polish
+
+**Objetivo**: Exportar template + tests + docs  
+**Entregable**: Export function → Test coverage → Documentación completa
+
+## B6.1: Packager Service
+
+- [ ] **src/main/services/Packager.ts**
+  - [ ] `exportTemplate(projectPath) → zipBuffer`
+    - [ ] Read database (canvasConfig, template, fields, components)
+    - [ ] Collect all assets from assets/images/
+    - [ ] Create zip: template.json + assets/
+    - [ ] Generate schema.json (field validation rules)
+    - [ ] Return zip buffer
+  - [ ] `zipProject(projectPath) → zipBuffer`
+    - [ ] ZIP entire project (project.ctm + data + assets)
+  - **Tests**: Zip creation, file structure preservation
+
+## B6.2: IPC Handlers
+
+- [ ] **src/main/ipc/handlers.ts** - Extend
+  - [ ] `project:export` (projectPath) → Return zip buffer
+  - [ ] `project:zip` (projectPath) → Return zip buffer
+
+## F6.1: Export Dialog
+
+- [ ] **src/renderer/src/components/dialogs/ExportDialog.tsx**
+  - [ ] Option: Export template only (template.json + assets + schema.json)
+  - [ ] Option: Export entire project (project.ctm + data + assets)
+  - [ ] File name input with default
+  - [ ] [Cancel] [Export] buttons
+  - [ ] On export: Trigger download via IPC
+  - **Tests**: Export dialog UX
+
+## F6.2: File Menu Update
+
+- [ ] Navbar menu:
+  - [ ] "File → Export" → Open ExportDialog
+  - [ ] Trigger download after export
+  - **Tests**: Menu handler
+
+## F6.3: Tests & Coverage
+
+- [ ] Unit tests:
+  - [ ] All types (types.ts)
+  - [ ] DbFactory + LowdbAdapter
+  - [ ] ProjectLauncher (create, load, CRUD)
+  - [ ] AssetManager (import, list)
+  - [ ] Packager (zip creation)
+  - [ ] Zustand store
+  - Target: 70%+ coverage
+- [ ] Component tests:
+  - [ ] App layout, Navbar, Canvas, Sidebar, Inspector
+  - [ ] All dialogs (Canvas config, Fields wizard, Component, Asset import, Export)
+  - [ ] TemplatePreview (field + component rendering)
+  - Target: 80%+ coverage
+- [ ] Integration tests:
+  - [ ] New project → Add fields → Add components → Import assets → Export
+  - [ ] Load project → Edit → Export
+  - [ ] Error scenarios (missing files, corrupt DB, etc.)
+- [ ] E2E tests:
+  - [ ] Full workflow capture (video/screenshot)
+  - [ ] Performance benchmarks (canvas with 100+ elements)
+
+## F6.4: Documentation
+
+- [ ] **docs/ARCHITECTURE.md** - Layer overview, design decisions
 - [ ] **docs/DATABASE.md** - DbFactory, adapters, schema
 - [ ] **docs/API.md** - IPC channels, request/response format
-- [ ] **docs/COMPONENTS.md** - Canvas, Sidebar, Inspector props
+- [ ] **docs/COMPONENTS.md** - Canvas, Sidebar, Inspector, Dialog props
 - [ ] **docs/DEVELOPMENT.md** - Setup, running locally, debugging
 - [ ] **docs/DEPLOYMENT.md** - Build, packaging, distribution
+- [ ] **docs/TYPES.md** - Type definitions reference
 
-### 4.4 Build & Packaging
+## F6.5: Polish
 
-- [ ] Configure electron-builder for distribution
-- [ ] Auto-update mechanism
-- [ ] Asset optimization in build
-- [ ] Code signing (macOS/Windows)
-- [ ] Release notes automation
+- [ ] [ ] Error dialog system (user-friendly error messages)
+- [ ] Toast notifications for success/warning
+- [ ] Keyboard shortcut guide modal (Shift+?)
+- [ ] Unsaved changes warning on close
+- [ ] Auto-save feature (save to DB every 30s)
+- [ ] Recent projects list
+- [ ] Dark mode theme (optional)
+- [ ] Accessibility audit (WCAG 2.1 AA)
 
-### 4.5 Performance Optimizations
+## F6.6: Tests
 
-- [ ] Memoize CardRenderer (prevent re-renders)
-- [ ] Lazy load heavy libraries (html2canvas for export)
-- [ ] Sidebar asset list virtualization (if 500+ images)
-- [ ] Sharp processing queue (limit concurrent conversions)
-- [ ] Asset caching by hash
-- [ ] Dialog animations using CSS transitions (avoid re-renders)
+- [ ] Full test suite: 70%+ coverage
+- [ ] Component snapshots
+- [ ] E2E workflow recording
+- [ ] Performance benchmarks
 
-### 4.6 Dialog/Modal System Polish
+**✅ Hito 6 Completado**: Exportar template → Suite de tests → Documentación completa
 
-- [ ] Confirmation dialogs (unsaved changes warning)
-- [ ] Error dialogs with retry logic
-- [ ] Toast notifications for quick feedback (non-blocking)
-- [ ] Focus management testing (keyboard trap within dialog)
-- [ ] Animation consistency across all modal types
-- [ ] Accessibility audit (WCAG 2.1 AA compliance)
-- [ ] Testing: Dialog state, keyboard nav, animations
+---
 
-### 4.7 Nice-to-Have Features
+# 🔧 Hitos Opcionales (Post-MVP)
 
-- [ ] Undo/Redo for field edits
-- [ ] Drag-to-reorder fields
-- [ ] Card templates + template manager modal
+## Hito 7: MongoDB & Encryption
+
+- [ ] **MongoAdapter** implementation
+- [ ] **Encryption** for project.ctm (v1.1+)
+- [ ] Password protection dialog
+- [ ] Key derivation (Argon2)
+
+## Hito 8: Advanced Asset Management
+
+- [ ] Sprite sheet crop tool (visual editor for imageCoords)
 - [ ] Batch import assets (modal wizard)
-- [ ] Export to different formats (PNG, JPG, customizable DPI)
-- [ ] Recent projects list + quick access
-- [ ] Keyboard shortcuts guide modal (? key)
-- [ ] Canvas zoom levels (50%, 75%, 100%, 150%)
-- [ ] Multi-step wizards for complex workflows
+- [ ] Asset thumbnails in sidebar
+- [ ] Asset tagging + search
+
+## Hito 9: Template Features
+
+- [ ] Conditional rendering logic (if field exists)
+- [ ] Component animation/effects (hover, transitions)
+- [ ] Custom fonts upload
+- [ ] Layer management (reorder fields/components by zIndex)
+
+## Hito 10: Export Enhancements
+
+- [ ] Export to PNG (render canvas to image)
+- [ ] Export to Figma design (connector plugin)
+- [ ] Custom DPI/resolution settings
+- [ ] Batch card generation (from CSV)
 
 ---
 
-## Execution Strategy
+# 📊 Tracking & Metrics
 
-### Parallel Tracks (Phase 1 + 2)
+## Hitos de Control
 
-```
-Sprint 1-2: Foundation (Phase 0)
-├─ Common types + constants (including ICanvasConfig)
-└─ Directory structure
+| Hito       | Criterios de Éxito                      |
+| ---------- | --------------------------------------- |
+| Foundation | Tipos compilados + DbFactory funciona   |
+| Hito 1     | App renderiza + menú responde           |
+| Hito 2     | Proyecto creado + canvas dimensionado   |
+| Hito 3     | Campos creados + visualizados en canvas |
+| Hito 4     | Componentes creados + posicionados      |
+| Hito 5     | Imágenes subidas + renderizadas         |
+| Hito 6     | Template exportado + tests 70%+         |
 
-Sprint 3-5: Parallel Development
-├─ TRACK A (Backend)
-│  ├─ DbFactory + Adapters (Lowdb first)
-│  ├─ Services (ProjectLauncher, AssetManager)
-│  └─ IPC handlers (project:load, project:save, etc.)
-│
-└─ TRACK B (Frontend)
-   ├─ Zustand stores (Card + Dialog)
-   ├─ Base components (Canvas, Sidebar, Inspector)
-   ├─ Dialog system (DialogProvider + BaseDialog)
-   ├─ Canvas config dialog
-   └─ Hooks (useApi, useAssets)
+## Definition of Done (Per Iteración)
 
-Sprint 6: Integration (Phase 3)
-├─ Preload bridge
-├─ E2E workflows (including dialog interactions)
-└─ Error recovery + error dialogs
-
-Sprint 7-8: Polish (Phase 4)
-├─ Tests + coverage (dialog tests included)
-├─ Dialog accessibility + animations
-├─ Documentation (including dialog UX guidelines)
-└─ Release prep
-```
-
-### Critical Path
-
-1. **Common types** (blocks everything)
-2. **DbFactory + Lowdb** (backend foundation)
-3. **ProjectLauncher** (load projects)
-4. **Zustand store** (frontend foundation)
-5. **Canvas component** (visual core)
-6. **IPC handlers** (bridge together)
-7. **Integration tests** (verify workflow)
-
-### Dependencies Summary
-
-```
-Phase 0 (Common)
-    ↓
-Phase 1 (Backend) ←→ Phase 2 (Frontend) [parallel]
-    ↓                  ↓
-Phase 3 (Integration)
-    ↓
-Phase 4 (Polish)
-```
+- [ ] All tasks completed (backlog empty)
+- [ ] Tests passing (including new tests for iteration)
+- [ ] Code reviewed + merged to main
+- [ ] No console errors/warnings
+- [ ] Checkpoint demo functional (recorded or live)
+- [ ] Documentation updated
 
 ---
 
-## Risk Mitigation
+# 🎯 Principios de Implementación
 
-| Risk                             | Mitigation                              |
-| -------------------------------- | --------------------------------------- |
-| Asset conversion bottleneck      | Implement queue, profile early          |
-| DB adapter switching             | Abstract IDatabase interface completely |
-| Canvas performance (100+ fields) | Memoization, virtualization             |
-| Cross-process IPC serialization  | Use JSON for all responses, type guards |
-| Relative path bugs               | Comprehensive path tests, lint rules    |
-
----
-
-## Metrics & Checkpoints
-
-- **Week 1-2**: Common types + DbFactory complete + tests passing
-- **Week 3-4**: ProjectLauncher + Canvas basic rendering
-- **Week 5**: Full feature integration + E2E tests green
-- **Week 6-8**: Polish, 70%+ test coverage, documentation complete
+1. **Valor visible cada sprint** - Demo después de cada iteración
+2. **Tests desde el inicio** - No esperar a final
+3. **Relative paths siempre** - Portabilidad crítica
+4. **IPC response wrapper** - `{ success, data?, error? }`
+5. **Zustand es source of truth** - No prop drilling
+6. **Asset protocol early** - Servir WebP desde inicio
+7. **Dialog system reusable** - BaseDialog + DialogProvider
+8. **Memoización en Canvas** - Evitar re-renders innecesarios
+9. **Accessibility first** - WCAG 2.1 en dialogs desde Iter 3
+10. **Error handling graceful** - Degradación, no crashes
 
 ---
 
-## Design Guidelines: Dialogs & Modals
-
-### Philosophy
-
-- **Keep main UI clean**: Complex configurations move to dialogs
-- **User context**: Dialogs restrict actions to single task (avoid distractions)
-- **Modern & polished**: Tailwind v4 + smooth animations
-- **Accessible by default**: WCAG 2.1 AA compliance
-
-### Dialog Anatomy
-
-```
-┌─────────────────────────────────────┐
-│ Title                           [X] │  ← Header (title + close button)
-├─────────────────────────────────────┤
-│                                     │
-│  Form/Content Area                  │  ← Content (main purpose)
-│  - Labels, inputs, help text        │
-│                                     │
-├─────────────────────────────────────┤
-│              [Cancel] [Primary]     │  ← Footer (actions, right-aligned)
-└─────────────────────────────────────┘
-```
-
-### Tailwind v4 Styling Quick Ref
-
-```
-Overlay: fixed inset-0 bg-black/50 backdrop-blur-sm
-Dialog:  fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-         w-full sm:w-96 max-w-md bg-gray-900 rounded-lg shadow-xl p-6
-         animate-[fadeInScale] (custom keyframe)
-
-Buttons: px-4 py-2 rounded-md font-medium transition-colors 150ms
-         Primary: bg-blue-600 hover:bg-blue-700 text-white
-         Secondary: bg-gray-700 hover:bg-gray-600 text-white
-```
-
-### Dialog Lifecycle
-
-1. **Open**: Focus first input, translate+fade animation (150ms)
-2. **Active**: User can TAB within dialog (focus trap)
-3. **Close**: Fade out (100ms), restore focus to trigger button
-4. Types of close: (1) user Cancel button, (2) ESC key, (3) outside click
-
-### Critical Dialog Types for v1
-
-1. **Canvas Config Dialog** (PRIORITY - Project Creation)
-   - Width + Height + PPC inputs with validation
-   - Live aspect ratio preview
-   - "Reset to Default" + "Cancel" + "Save" buttons
-   - Shown on: New Project creation
-
-2. **Fields Wizard Dialog** (PRIORITY - Initial Setup)
-   - Step-by-step field creation: name, type, validation, position, style
-   - Support types: text, number, option
-   - Option management: add/remove option values
-   - Multi-step: "Add Field" → "Add Next?" → "Finish"
-   - All fields persisted at wizard completion
-
-3. **Asset Import Dialog** (HIGH PRIORITY)
-   - Component + Value selectors
-   - Optional: Visual crop tool for spriteOptions
-   - File upload + WebP conversion
-   - Success confirmation
-
-4. **Project Settings Dialog** (AFTER SETUP)
-   - Template metadata (name, description, version)
-   - "Save" + "Cancel" buttons
-
-5. **Confirmation Dialogs** (IMPORTANT)
-   - "Discard unsaved changes?" before closing
-   - "Delete this field/component?" confirmation
-
-6. **Error Dialogs** (IMPORTANT)
-   - Show error message + reason
-   - "Retry" + "Dismiss" buttons
-
-### Dialog Testing Checklist
-
-- [ ] Focus trap (TAB doesn't escape dialog)
-- [ ] ESC key closes dialog
-- [ ] Click outside dismisses (if applicable)
-- [ ] Click Cancel/primary buttons work
-- [ ] Keyboard ENTER activates primary button
-- [ ] Focus returns to trigger on close
-- [ ] Overlay blur effect works
-- [ ] Animation smooth (no jank)
-- [ ] Mobile responsive (vertical stacking)
-- [ ] Screen reader announces dialog (aria-modal, aria-labelledby)
-
----
-
-## Notes for Implementation
-
-### Backend Priorities
-
-1. **Relative paths is non-negotiable** → No `C:/Users/...` in database
-2. **DbFactory must be production-ready** → Lowdb for dev, MongoDB for prod
-3. **Asset optimization matters** → WebP quality 90, effort 6
-4. **IPC response format** → Always `{ success, data?, error? }`
-
-### Frontend Priorities
-
-1. **Canvas dimensions from project** → Read from canvasConfig, NOT hardcoded constants
-2. **Dialog system early** → Implement DialogProvider + BaseDialog in Sprint 3 (Phase 2)
-3. **Zustand is source of truth** → No prop drilling, use selectors
-4. **Responsive canvas sizing** → CSS aspect-ratio, dynamic width/height
-5. **Asset protocol is critical** → Backend serves WebP via asset://
-6. **Memoization prevents lag** → CardRenderer + dialog components must be memoized
-7. **Accessibility first** → Dialog focus trap, keyboard shortcuts, aria attributes
-
-### Testing Strategy
-
-- Unit tests for pure functions (types, utils)
-- Integration tests for IPC coupling
-- Component tests for UI behavior
-- E2E tests for critical user flows
-
----
-
-**Generated**: 2026-04-02  
-**Version**: 1.0 Full Scope  
-**Status**: Ready for Sprint Planning
+**Actualizado**: 2026-04-02  
+**Estado**: ✅ Listo para ejecución  
+**Formato**: Funcionalidades por Hito (sin estimaciones de tiempo)
