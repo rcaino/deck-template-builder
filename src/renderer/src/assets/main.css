@@ -1,4 +1,4 @@
-@import './base.css';
+@import "./base.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -14,7 +14,6 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background-image: url('./wavy-lines.svg');
   background-size: cover;
   user-select: none;
 }
@@ -138,7 +137,7 @@ code {
   bottom: 30px;
   margin: 0 auto;
   padding: 15px 0;
-  font-family: 'Menlo', 'Lucida Console', monospace;
+  font-family: "Menlo", "Lucida Console", monospace;
   display: inline-flex;
   overflow: hidden;
   align-items: center;

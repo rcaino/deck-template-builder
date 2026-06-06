@@ -1,0 +1,19 @@
+.sider {
+  overflow: auto;
+  height: 100%;
+  position: sticky;
+  inset-inline-start: 0;
+  top: 0;
+  border-right: 1px solid var(--ant-color-info-border);
+  box-shadow: 0 10px 15px -3px var(--ant-color-info-border);
+  padding: 5px;
+  margin-top: -1px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sider :global(.ant-layout-sider-children) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}

@@ -10,7 +10,7 @@ applyTo: "src/renderer/**"
 
 ### Canvas Component (`/components/canvas/`)
 
-- **Dynamic dimensions**: Read from `project.canvasConfig` (default 1000x1800px)
+- **Dynamic dimensions**: Read from `project.canvasConfig`
 - Renders card design live with responsive scaling
 - Respond to sidebar selection and inspector edits
 - Use Zustand store for card state + project config
@@ -80,10 +80,11 @@ async function saveProject() {
 }
 ```
 
-## Styling with Tailwind v4
+## Styling with Ant Design
 
-- Use `base.css` for global utilities
-- Component-level: inline Tailwind classes
+- Use Ant Design for styling and component structure
+- Global utilities: `base.css` for common styles
+- Component-level: inline Ant Design classes
 - Responsive: `sm:`, `md:`, `lg:` prefixes
 - Custom canvas sizing: Already set to 1000x1800px
 

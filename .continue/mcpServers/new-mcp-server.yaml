@@ -1,0 +1,8 @@
+name: Antd_Design
+version: 6.3.6
+schema: v1
+mcpServers:
+  - name: antd
+    command: antd
+    args: ["mcp", "--version", "6.3.6"]
+    env: {}

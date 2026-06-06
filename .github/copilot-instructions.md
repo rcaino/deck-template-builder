@@ -35,7 +35,7 @@ A template defines:
 - **Sidebar**: Asset list and image management
 - **Inspector**: Field editor and styling panel
 - **State Management**: Zustand for global state
-- **Styling**: Tailwind CSS v4
+- **Styling**: Ant Design (using MCP/CLI for configuration)
 
 ### 🟡 Bridge (Preload)
 
@@ -43,9 +43,7 @@ A template defines:
 
 ### 🤝 Shared Contract (`/common`)
 
-- `types.ts`: `IComponent`, `IField`, `ITemplate`, `ICTMManifest`, `IDBConfig`, `ICanvasConfig`
-- `constants.ts`: `DEFAULT_CANVAS_WIDTH = 1000`, `DEFAULT_CANVAS_HEIGHT = 1800`
-  - Note: Components and fields are user-defined per-project in database, not in project.ctm
+- Note: Components and fields are user-defined per-project in database, not in project.ctm
 
 ## Project File Structure
 
@@ -109,7 +107,7 @@ Each project folder contains:
 
 - **Electron 30+** with Vite
 - **React 18** with TypeScript
-- **Tailwind CSS v4**
+- **Ant Design** (using MCP/CLI for configuration)
 - **Sharp** for image processing
 - **Lowdb/MongoDB** for persistence
 
