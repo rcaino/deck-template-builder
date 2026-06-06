@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { IComponentDefinition, ILevelLayer } from "@common/types";
 import { IRootLayer } from "@common/layerTypes";
 import { useHistoryStore } from "./useHistoryStore";
+import bgImage from "../assets/default_project_template/card-front-back.png";
 
 interface ITemplateStoreData {
   projectId: string;
@@ -31,7 +32,7 @@ const DEFAULT_TEMPLATE_STATE: ITemplateStoreData = {
       size: { height: 1350, width: 750 },
       ppc: 150,
       type: "root",
-      style: {}
+      style: { backgroundImage: bgImage }
     }
   }
 };

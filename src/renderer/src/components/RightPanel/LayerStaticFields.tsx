@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Input, Space, InputNumber, Form } from "antd";
 import { IComponentDefinition } from "@common/types";
 import { SmartImageUpload } from "../Inputs/SmartImageUpload";
@@ -12,6 +12,7 @@ interface ILayerFieldsProps {
 export const LayerStaticFields: React.FC<ILayerFieldsProps> = ({ layer, isForPrint }) => {
   const isRoot = layer.type === "root";
   const hasBackground = ["root", "area"].includes(layer.type);
+  const [bgImage, setBgImage] = useState<string>(layer.style.backgroundImage as string);
   return (
     <>
       <Form.Item name="name" label="Layer Name">
@@ -51,8 +52,8 @@ export const LayerStaticFields: React.FC<ILayerFieldsProps> = ({ layer, isForPri
           </Form.Item>
           <Form.Item label="Background Image" style={{ marginBottom: 0 }}>
             <Space.Compact>
-              <Form.Item name={"backgroundImage"}>
-                <SmartImageUpload />
+              <Form.Item name={"backgroundImage"} valuePropName="layer.style.backgroundImage">
+                <SmartImageUpload value={bgImage} onChange={setBgImage} />
               </Form.Item>
             </Space.Compact>
           </Form.Item>

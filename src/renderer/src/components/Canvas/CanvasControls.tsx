@@ -8,7 +8,7 @@ import {
   ArrowLeftOutlined,
   ArrowRightOutlined,
   AppstoreOutlined,
-  SwapOutlined
+  InteractionFilled
 } from "@ant-design/icons";
 import { useTemplateStore } from "../../store/useTemplateStore";
 
@@ -67,7 +67,7 @@ const CanvasControls: React.FC<CanvasControlsProps> = ({
             onClick={onZoomIn}
             title="Zoom In (Ctrl++)"
           />
-          <Button icon={<SwapOutlined />} onClick={() => swapXY()} title="Turn" />
+          <Button icon={<InteractionFilled />} onClick={() => swapXY()} title="Turn" />
           <Button
             icon={<BorderOuterOutlined />}
             onClick={() => console.log("calibrate")}
