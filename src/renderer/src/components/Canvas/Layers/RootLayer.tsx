@@ -13,12 +13,14 @@ const isImage = (path: string): boolean => {
 };
 
 const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: LayerRootProps) => {
+  const { size, style } = layerProps;
+
   const backgroundImgStyle: React.CSSProperties = {
     position: "absolute",
     top: 0,
     left: 0,
-    width: layerProps.size.width * scale,
-    height: layerProps.size.height * scale,
+    width: size.width * scale,
+    height: size.height * scale,
     // objectFit: "cover",
     pointerEvents: "none"
   };
@@ -34,22 +36,23 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
     backgroundPosition: "0 0, 20px 20px",
     cursor: "crosshair",
     position: "relative",
-    width: layerProps.size.width * scale,
-    height: layerProps.size.height * scale
+    width: size.width * scale,
+    height: size.height * scale
   };
 
   const rootStyles: React.CSSProperties = {
     position: "relative",
-    width: layerProps.size.width * scale,
-    height: layerProps.size.height * scale,
+    width: size.width * scale,
+    height: size.height * scale,
     margin: 0,
     padding: 0,
     overflow: "hidden"
   };
-  const hasBackgroundImage =
-    typeof layerProps.style.backgroundColor === "string"
-      ? false
-      : isImage(layerProps.style.backgroundImage as string);
+  const hasBackgroundImage = !style.backgroundColor && isImage(style.backgroundImage as string);
+
+  const backgroundColor = (!hasBackgroundImage && { backgroundColor: style.backgroundColor }) || {};
+
+  const hasBorder = style.border != undefined;
 
   return (
     <div style={canvasStyles} className="canvas-container">
@@ -58,8 +61,7 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
         className="root-layer"
         style={{
           ...rootStyles,
-          ...layerProps.style,
-          backgroundImage: hasBackgroundImage ? undefined : layerProps.style.backgroundImage
+          ...backgroundColor
         }}
         data-layer-id={layerProps.id}
       >
@@ -67,8 +69,17 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
           <img
             draggable="false"
             style={backgroundImgStyle}
-            src={layerProps.style.backgroundImage}
+            src={style.backgroundImage}
             alt="Card Background"
+          />
+        )}
+        {hasBorder && (
+          <span
+            style={{
+              ...backgroundImgStyle,
+              ...style.border,
+              ...{ borderWidth: style.border.borderWidth * scale }
+            }}
           />
         )}
         {children}

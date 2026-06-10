@@ -4,6 +4,7 @@ import { IComponentDefinition, ILevelLayer } from "@common/types";
 import { IRootLayer } from "@common/layerTypes";
 import { useHistoryStore } from "./useHistoryStore";
 import bgImage from "../assets/default_project_template/card-front-back.png";
+import cardBorder from "../assets/default_project_template/card-front-border.png";
 
 interface ITemplateStoreData {
   projectId: string;
@@ -32,7 +33,16 @@ const DEFAULT_TEMPLATE_STATE: ITemplateStoreData = {
       size: { height: 1350, width: 750 },
       ppc: 150,
       type: "root",
-      style: { backgroundImage: bgImage }
+      style: {
+        backgroundImage: bgImage,
+        border: {
+          borderImage: 'url("' + cardBorder + '")',
+          borderImageRepeat: "round",
+          borderImageSlice: "9% 6%",
+          borderWidth: 33,
+          borderStyle: "solid"
+        }
+      }
     }
   }
 };

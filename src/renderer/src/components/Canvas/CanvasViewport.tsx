@@ -4,7 +4,6 @@ import { DataType, ILevelLayer } from "@common/types";
 import RootLayer from "./Layers/RootLayer";
 import AreaLayer from "./Layers/AreaLayer";
 import FieldLayer from "./Layers/FieldLayer";
-import cardFront from "../../assets/default_project_template/card-front-border.png";
 
 interface CanvasViewportProps {
   zoomLevel: number;
@@ -74,7 +73,7 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
     <div style={viewportStyle} ref={viewportRef}>
       <RootLayer
         layerProps={{
-          style: rootFromStore?.style || { backgroundImage: cardFront },
+          style: rootFromStore?.style,
           size: { height: canvasHeight, width: canvasWidth },
           position: { x: 0, y: 0 },
           id: "root",
