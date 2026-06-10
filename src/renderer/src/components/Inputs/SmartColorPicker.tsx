@@ -56,8 +56,18 @@ export const SmartColorPicker: React.FC<SmartColorPickerProps> = ({
   };
 
   return isForPrint ? (
-    <ColorPicker value={currentPrintSafe} onChangeComplete={handleChange} disabledAlpha={true} />
+    <ColorPicker
+      value={currentPrintSafe}
+      onChangeComplete={handleChange}
+      disabledAlpha={true}
+      allowClear
+    />
   ) : (
-    <ColorPicker value={currentOriginal} onChangeComplete={handleChange} disabledAlpha={false} />
+    <ColorPicker
+      value={currentOriginal}
+      onChangeComplete={handleChange}
+      disabledAlpha={false}
+      allowClear
+    />
   );
 };
