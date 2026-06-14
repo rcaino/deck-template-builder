@@ -4,10 +4,13 @@ import {
   BrowserWindow,
   ipcMain,
   nativeImage,
-  BrowserWindowConstructorOptions
+  BrowserWindowConstructorOptions,
+  protocol,
+  net
 } from "electron";
-import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
+import { join } from "path";
+import FontAPI from "./api/fonts";
 import icon from "../../resources/card-extension.ico?asset";
 
 let mainWindow: BrowserWindow | null = null;
@@ -45,7 +48,24 @@ function createWindow(): void {
   }
 }
 
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: "local-font",
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      bypassCSP: true
+    }
+  }
+]);
+
 app.whenReady().then(() => {
+  protocol.handle("local-font", (request) => {
+    let filePath = request.url.replace("local-font://", "").replace("c/", "C:/");
+    filePath = decodeURI(filePath);
+    return net.fetch("file:///" + filePath);
+  });
   electronApp.setAppUserModelId("com.electron");
 
   app.on("browser-window-created", (_, window) => {
@@ -53,6 +73,7 @@ app.whenReady().then(() => {
   });
 
   ipcMain.on("ping", () => console.log("pong"));
+  FontAPI.registerFontApiHandlers();
 
   createWindow();
 

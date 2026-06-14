@@ -1,9 +1,10 @@
 import { Layout } from "antd";
-// import { useTemplateStore } from "./store/useTemplateStore";
 import Navbar from "./components/TopHeader/Navbar";
 import Canvas from "./components/Canvas/Canvas";
 import LeftPanel from "./components/LeftPanel/LeftPanel";
 import RightPanel from "./components/RightPanel/RightPanel";
+import { useFontStore } from "./store/useFontStore";
+import { useEffect } from "react";
 
 const layoutStyle: React.CSSProperties = {
   borderRadius: 8,
@@ -15,7 +16,11 @@ const layoutStyle: React.CSSProperties = {
 };
 
 function App(): React.JSX.Element {
-  // const projectName = useTemplateStore((state) => state.projectName);
+  const loadFonts = useFontStore((state) => state.loadFonts);
+
+  useEffect(() => {
+    loadFonts();
+  }, [loadFonts]);
 
   return (
     <Layout style={layoutStyle}>

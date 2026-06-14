@@ -78,7 +78,10 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
             style={{
               ...backgroundImgStyle,
               ...style.border,
-              ...{ borderWidth: style.border.borderWidth * scale }
+              ...{
+                borderWidth: style.border.borderWidth * scale,
+                borderImage: `url(" ${style.border?.["borderImage"]}")`
+              }
             }}
           />
         )}

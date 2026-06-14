@@ -1,4 +1,5 @@
 // src/common/types.ts
+import React from "react";
 import { IAreaLayer, IDataLayer, IRootLayer } from "./layerTypes";
 
 export const GRID_SNAP = 10;
@@ -10,7 +11,7 @@ export type ILevelLayer = IAreaLayer | IDataLayer;
 export interface IComponentStyle {
   backgroundImage?: React.CSSProperties["backgroundImage"];
   backgroundColor?: React.CSSProperties["backgroundColor"];
-  border:
+  border?:
     | {
         borderWidth: number;
         borderStyle: React.CSSProperties["borderStyle"];
@@ -29,4 +30,10 @@ export interface ICardProject {
   id: string;
   name: string;
   components: IComponentDefinition[];
+}
+
+export interface IFontInfo {
+  name: string;
+  path: string;
+  type: "local" | "system";
 }

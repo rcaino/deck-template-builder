@@ -24,9 +24,9 @@ export interface IAreaLayer {
   size: { width: number; height: number };
   style: IComponentStyle;
   conditionalStyle: Array<keyof IComponentStyle>;
-  backgroundColor: React.CSSProperties["backgroundColor"];
-  backgroundImage: React.CSSProperties["backgroundImage"];
-  path:
+  backgroundColor?: React.CSSProperties["backgroundColor"];
+  backgroundImage?: React.CSSProperties["backgroundImage"];
+  path?:
     | React.CSSProperties["clipPath"]
     | "circle"
     | "hexagon"
@@ -38,7 +38,7 @@ export interface IAreaLayer {
     | "rhombus"
     | "star"
     | "triangle";
-  border: React.CSSProperties["border"];
+  border?: React.CSSProperties["border"];
   level: number;
   parentId: string;
 }
@@ -52,7 +52,7 @@ export interface IDataLayer {
   position: { x: number; y: number };
   size: { width: number; height: number };
   style: IComponentStyle;
-  fontColor: React.CSSProperties["color"];
+  fontColor?: React.CSSProperties["color"];
   fontSize: React.CSSProperties["fontSize"];
   fontFamily: React.CSSProperties["fontFamily"];
   level: number;

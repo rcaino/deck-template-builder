@@ -1,8 +1,7 @@
 import "./assets/main.css";
 import "./assets/base.css";
-import "./assets/default_project_template/card-back.png";
-import "./assets/default_project_template/card-front-back.png";
-import "./assets/default_project_template/card-front-border.png";
+import.meta.glob("./assets/fonts/*.ttf", { eager: true });
+import.meta.glob("./assets/default_project_template/*.png", { eager: true });
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";

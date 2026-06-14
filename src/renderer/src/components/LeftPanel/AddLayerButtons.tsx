@@ -6,6 +6,7 @@ import { useTemplateStore } from "@renderer/store/useTemplateStore";
 import { IAreaLayer, IDataLayer } from "@common/layerTypes";
 import { ulid } from "@common/ulid";
 import { ILevelLayer } from "@common/types";
+import { useFontStore } from "@renderer/store/useFontStore";
 
 const buttonStyle: React.CSSProperties = {
   display: "auto",
@@ -27,6 +28,7 @@ const AddLayerButtons: React.FC = () => {
   const selectedLayer = useTemplateStore((state) => state.selectedLayer);
   const currentLayer = useTemplateStore((state) => state.layers[selectedLayer]);
   const setSelectedLayer = useTemplateStore((state) => state.setSelectedLayer);
+  const { fonts, lastUsedFont } = useFontStore();
 
   const newAreaLayer: IAreaLayer = {
     id: ulid(),
@@ -50,7 +52,9 @@ const AddLayerButtons: React.FC = () => {
     size: { height: currentLayer.size.height / 2, width: currentLayer.size.width / 2 },
     style: {},
     mappingKey: "",
-    dataType: "text"
+    dataType: "text",
+    fontSize: 14,
+    fontFamily: lastUsedFont?.path ?? fonts[0]?.path
   };
 
   const addNewLayer: (newLayer: ILevelLayer) => void = (newLayer: ILevelLayer) => {

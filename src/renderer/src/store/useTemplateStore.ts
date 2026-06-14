@@ -36,7 +36,7 @@ const DEFAULT_TEMPLATE_STATE: ITemplateStoreData = {
       style: {
         backgroundImage: bgImage,
         border: {
-          borderImage: 'url("' + cardBorder + '")',
+          borderImage: cardBorder,
           borderImageRepeat: "round",
           borderImageSlice: "9% 6%",
           borderWidth: 33,
