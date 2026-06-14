@@ -2,18 +2,25 @@ import { app, ipcMain } from "electron";
 import fs from "fs";
 import os from "os";
 import path from "path";
+import { create } from "fontkitten";
 import { IFontInfo } from "../../common/types";
 
 const FONTS_DIR = app.isPackaged
   ? path.join(process.resourcesPath, "fonts")
   : path.join(__dirname, "../../resources/fonts");
 
+const validExtensions = new Set([".ttf", ".otf", ".ttc"]);
+
 const getSystemFontFiles = (): { name: string; path: string }[] => {
   const platform = os.platform();
   let fontDirs: string[] = [];
 
   if (platform === "win32") {
-    fontDirs = [path.join(process.env.WINDIR || "C:\\Windows", "Fonts")];
+    const localAppData = process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local");
+    fontDirs = [
+      path.join(process.env.WINDIR || "C:\\Windows", "Fonts"),
+      path.join(localAppData, "Microsoft\\Windows\\Fonts")
+    ];
   } else if (platform === "darwin") {
     // macOS
     fontDirs = [
@@ -31,16 +38,25 @@ const getSystemFontFiles = (): { name: string; path: string }[] => {
     if (fs.existsSync(dir)) {
       const files = fs.readdirSync(dir);
       files.forEach((file) => {
-        if (file.endsWith(".ttf") || file.endsWith(".otf")) {
-          systemFonts.push({
-            name: path.parse(file).name,
-            path: path.join(dir, file)
-          });
+        const ext = path.extname(file).toLowerCase();
+        if (validExtensions.has(ext)) {
+          try {
+            const filePath = path.join(dir, file);
+            const buffer = fs.readFileSync(filePath);
+            const font = create(buffer);
+            const fontObj = font.isCollection ? font.fonts[0] : font;
+
+            systemFonts.push({
+              name: fontObj.fullName,
+              path: filePath
+            });
+          } catch (e) {
+            console.warn(`Fail to load font ${file}, ex:`, e);
+          }
         }
       });
     }
   });
-
   return systemFonts;
 };
 

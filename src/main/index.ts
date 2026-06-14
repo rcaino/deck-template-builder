@@ -10,7 +10,7 @@ import {
 } from "electron";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { join } from "path";
-import FontAPI from "./api/fonts";
+import FontAPI from "./api/fontAPI";
 import icon from "../../resources/card-extension.ico?asset";
 
 let mainWindow: BrowserWindow | null = null;
