@@ -1,6 +1,14 @@
 {
   "name": "deck-template-builder",
   "version": "1.0.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron",
+      "electron-winstaller",
+      "esbuild",
+      "sharp"
+    ]
+  },
   "description": "Just a card template builder",
   "main": "./out/main/index.js",
   "author": "rcaino",
