@@ -17,38 +17,16 @@
         "REMOTE_DEBUGGING_PORT": "9222"
       }
     },
-<<<<<<< HEAD
-      "runtimeArgs": [
-      "--sourcemap"
-    ],
-    "env": {
-      "REMOTE_DEBUGGING_PORT": "9222"
-=======
-      {
-        "name": "Debug Renderer Process",
-        "port": 9222,
-        "request": "attach",
-        "type": "chrome",
-        "webRoot": "${workspaceFolder}/src/renderer",
-        "timeout": 60000,
-        "presentation": {
-          "hidden": true
-        }
->>>>>>> fc306300192286a744ad3f1c5e8124e2e467e50f
+    {
+      "name": "Debug Renderer Process",
+      "port": 9222,
+      "request": "attach",
+      "type": "chrome",
+      "webRoot": "${workspaceFolder}/src/renderer",
+      "timeout": 60000,
+      "presentation": {
+        "hidden": true
       }
-    ],
-    "compounds": [
-      {
-        "name": "Debug All",
-        "configurations": [
-          "Debug Main Process",
-          "Debug Renderer Process"
-        ],
-        "presentation": {
-          "order": 1
-        }
-      }
-<<<<<<< HEAD
     }
   ],
   "compounds": [
@@ -64,7 +42,3 @@
     }
   ]
 }
-=======
-]
-}
->>>>>>> fc306300192286a744ad3f1c5e8124e2e467e50f
