@@ -11,6 +11,7 @@ import {
   InteractionFilled
 } from "@ant-design/icons";
 import { useTemplateStore } from "../../store/useTemplateStore";
+import { useI18n } from "@renderer/hooks/useI18n";//agregado la libreria
 
 interface CanvasControlsProps {
   zoomLevel: number;
@@ -24,6 +25,7 @@ interface CanvasControlsProps {
   canvasWidth: number;
   canvasHeight: number;
   canvasPPC: number;
+
 }
 
 const containerStyle: React.CSSProperties = {
@@ -49,6 +51,8 @@ const CanvasControls: React.FC<CanvasControlsProps> = ({
   canvasHeight,
   canvasPPC
 }) => {
+  /* projectName = "Mi Súper Carta"; */ /* hardcodeo para ver si funciona */
+  const { t } = useI18n();//agregado, asigna a t la funcion de traduccion
   const swapXY = useTemplateStore((state) => state.swapXY);
   return (
     <div style={containerStyle}>
@@ -58,20 +62,28 @@ const CanvasControls: React.FC<CanvasControlsProps> = ({
             {...{ disabled: zoomLevel <= 0.5 }}
             icon={<ZoomOutOutlined />}
             onClick={onZoomOut}
-            title="Zoom Out (Ctrl+-)"
+            title={t("centralPanel.settings.ZoomOut")}//cambiado
           />
-          <Button icon={<UndoOutlined />} onClick={onResetZoom} title="Reset Zoom (Ctrl+0)" />
+          <Button
+            icon={<UndoOutlined />}
+            onClick={onResetZoom}
+            title={t("centralPanel.settings.ResetZoom")}//cambiado
+          />
           <Button
             {...{ disabled: zoomLevel >= 2 }}
             icon={<ZoomInOutlined />}
             onClick={onZoomIn}
-            title="Zoom In (Ctrl++)"
+            title={t("centralPanel.settings.ZoomIn")}//cambiado
           />
-          <Button icon={<InteractionFilled />} onClick={() => swapXY()} title="Turn" />
+          <Button
+            icon={<InteractionFilled />}
+            onClick={() => swapXY()}
+            title={t("centralPanel.settings.Turn")}//cambiado
+          />
           <Button
             icon={<BorderOuterOutlined />}
             onClick={() => console.log("calibrate")}
-            title="Calibrate"
+            title={t("centralPanel.settings.Calibrate")}//cambiado
           />
         </Space>
 
@@ -91,11 +103,16 @@ const CanvasControls: React.FC<CanvasControlsProps> = ({
           tooltip={{ formatter: (val) => `${Math.round((val as number) * 100)}%` }}
         />
       </div>
-      <div style={{ textAlign: "center", verticalAlign: "center" }}>
-        <span>Project: {projectName}</span>
+      <div style={{ textAlign: "center", verticalAlign: "middle" }}>
+        <span>
+          {t("centralPanel.Project")}:{" "}{/*cambiado*/}
+          {projectName && projectName !== "New Project"
+            ? projectName
+            : t("centralPanel.NewProject")}{/* cambie el hardcodeo de la palabar project y tambien el projectname por si carga un nombre y si no carga se pone en false y mostrara la traduccion */}
+        </span>
         <br />
         <span>
-          Canvas: {canvasWidth}px × {canvasHeight}px
+          <span>{t("centralPanel.Canvas")}: </span> {canvasWidth}px × {canvasHeight}px{/* cambiado */}
         </span>
         <br />
         <span>
@@ -104,13 +121,21 @@ const CanvasControls: React.FC<CanvasControlsProps> = ({
       </div>
       <div>
         <Space>
-          <Button icon={<ArrowLeftOutlined />} onClick={onPrevious} title="Previous (Ctrl+←)" />
+          <Button
+            icon={<ArrowLeftOutlined />}
+            onClick={onPrevious}
+            title={t("centralPanel.settings.Previous")}
+          />
           <Button
             icon={<AppstoreOutlined />}
-            onClick={() => console.log("genericData")}
-            title="Generic "
+            onClick={() => console.log(t("centralPanel.settings.Generic"))}
+            title={t("centralPanel.settings.Generic")}
           />
-          <Button icon={<ArrowRightOutlined />} onClick={onNext} title="Next (Ctrl+→)" />
+          <Button
+            icon={<ArrowRightOutlined />}
+            onClick={onNext}
+            title={t("centralPanel.settings.Next")}
+          />
         </Space>
       </div>
     </div>
