@@ -21,20 +21,19 @@ export const localeEN: ILocale = {
     newLayerDataButtonText: "Data",
     sectionLayers: "Layers"
   },
-  /* traduzco a ingles las variables el panel central y configuracones */
   centralPanel: {
-    Project: "Project",
-    NewProject: "New Project",
-    Canvas: "Card Area",
+    project: "Project",
+    newProject: "New Project",
+    canvas: "Card Area",
     settings: {
-      ZoomOut: "Zoom Out",
-      ResetZoom: "Reset Zoom",
-      ZoomIn: "Zoom In",
-      Turn: "Turn",
-      Calibrate: "Calibrate",
-      Previous: "Previous",
-      Generic: "Generic Card",
-      Next: "Next"
+      zoomOut: "Zoom Out",
+      resetZoom: "Reset Zoom",
+      zoomIn: "Zoom In",
+      turn: "Turn",
+      calibrate: "Calibrate",
+      previous: "Previous",
+      generic: "Generic Card",
+      next: "Next"
     }
   },
   rightPanel: {

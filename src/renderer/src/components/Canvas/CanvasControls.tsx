@@ -11,7 +11,7 @@ import {
   InteractionFilled
 } from "@ant-design/icons";
 import { useTemplateStore } from "../../store/useTemplateStore";
-import { useI18n } from "@renderer/hooks/useI18n";//agregado la libreria
+import { useI18n } from "../../hooks/useI18n";
 
 interface CanvasControlsProps {
   zoomLevel: number;
@@ -25,7 +25,6 @@ interface CanvasControlsProps {
   canvasWidth: number;
   canvasHeight: number;
   canvasPPC: number;
-
 }
 
 const containerStyle: React.CSSProperties = {
@@ -51,8 +50,7 @@ const CanvasControls: React.FC<CanvasControlsProps> = ({
   canvasHeight,
   canvasPPC
 }) => {
-  /* projectName = "Mi Súper Carta"; */ /* hardcodeo para ver si funciona */
-  const { t } = useI18n();//agregado, asigna a t la funcion de traduccion
+  const { t } = useI18n();
   const swapXY = useTemplateStore((state) => state.swapXY);
   return (
     <div style={containerStyle}>
@@ -62,28 +60,28 @@ const CanvasControls: React.FC<CanvasControlsProps> = ({
             {...{ disabled: zoomLevel <= 0.5 }}
             icon={<ZoomOutOutlined />}
             onClick={onZoomOut}
-            title={t("centralPanel.settings.ZoomOut")}//cambiado
+            title={t("centralPanel.settings.zoomOut")}
           />
           <Button
             icon={<UndoOutlined />}
             onClick={onResetZoom}
-            title={t("centralPanel.settings.ResetZoom")}//cambiado
+            title={t("centralPanel.settings.resetZoom")}
           />
           <Button
             {...{ disabled: zoomLevel >= 2 }}
             icon={<ZoomInOutlined />}
             onClick={onZoomIn}
-            title={t("centralPanel.settings.ZoomIn")}//cambiado
+            title={t("centralPanel.settings.zoomIn")}
           />
           <Button
             icon={<InteractionFilled />}
             onClick={() => swapXY()}
-            title={t("centralPanel.settings.Turn")}//cambiado
+            title={t("centralPanel.settings.turn")}
           />
           <Button
             icon={<BorderOuterOutlined />}
             onClick={() => console.log("calibrate")}
-            title={t("centralPanel.settings.Calibrate")}//cambiado
+            title={t("centralPanel.settings.calibrate")}
           />
         </Space>
 
@@ -105,14 +103,15 @@ const CanvasControls: React.FC<CanvasControlsProps> = ({
       </div>
       <div style={{ textAlign: "center", verticalAlign: "middle" }}>
         <span>
-          {t("centralPanel.Project")}:{" "}{/*cambiado*/}
+          {t("centralPanel.project")}
           {projectName && projectName !== "New Project"
             ? projectName
-            : t("centralPanel.NewProject")}{/* cambie el hardcodeo de la palabar project y tambien el projectname por si carga un nombre y si no carga se pone en false y mostrara la traduccion */}
+            : t("centralPanel.newProject")}
         </span>
         <br />
         <span>
-          <span>{t("centralPanel.Canvas")}: </span> {canvasWidth}px × {canvasHeight}px{/* cambiado */}
+          {t("centralPanel.canvas")}
+          {canvasWidth}px × {canvasHeight}px
         </span>
         <br />
         <span>
@@ -124,17 +123,17 @@ const CanvasControls: React.FC<CanvasControlsProps> = ({
           <Button
             icon={<ArrowLeftOutlined />}
             onClick={onPrevious}
-            title={t("centralPanel.settings.Previous")}
+            title={t("centralPanel.settings.previous")}
           />
           <Button
             icon={<AppstoreOutlined />}
-            onClick={() => console.log(t("centralPanel.settings.Generic"))}
-            title={t("centralPanel.settings.Generic")}
+            onClick={() => console.log(t("centralPanel.settings.generic"))}
+            title={t("centralPanel.settings.generic")}
           />
           <Button
             icon={<ArrowRightOutlined />}
             onClick={onNext}
-            title={t("centralPanel.settings.Next")}
+            title={t("centralPanel.settings.next")}
           />
         </Space>
       </div>

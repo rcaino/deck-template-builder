@@ -5,18 +5,18 @@ import { ILocale } from "./ILocale";
 export type SupportedLocale = "es" | "en";
 
 class I18nManager {
-  private currentLocale: SupportedLocale = this.getSystemLocale();
-  private locales: Record<SupportedLocale, ILocale> = {
+  public currentLocale: SupportedLocale = this.getSystemLocale();
+  public locales: Record<SupportedLocale, ILocale> = {
     es: localeES,
     en: localeEN
   };
-  private getSystemLocale(): SupportedLocale {
-    // navigator.language suele devolver algo como "en-US" o "es-AR"
-    const systemLang = navigator.language.split("-")[0]; // Se queda con "en" o "es"
+
+  public getSystemLocale(): SupportedLocale {
+    const systemLang = navigator.language.split("-")[0];
     if (systemLang === "en" || systemLang === "es") {
       return systemLang;
     }
-    return "en"; // Idioma por defecto (fallback) si el sistema está en otro idioma
+    return "en"; // fallback
   }
 
   public setLocale(locale: SupportedLocale): void {
@@ -53,4 +53,3 @@ class I18nManager {
 }
 
 export const i18n = new I18nManager();
-export type { ILocale } from "./ILocale";

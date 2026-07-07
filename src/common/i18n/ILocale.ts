@@ -23,21 +23,19 @@ interface ILocale {
     newLayerDataButtonText: string;
     sectionLayers: string;
   };
-  /* declaro las variables del panel central y configuracones */
-  /* las desclaro en medio de panel izquierdo y derecho como en la app */
   centralPanel: {
-    Project: string;
-    NewProject: string;
-    Canvas: string;
+    project: string;
+    newProject: string;
+    canvas: string;
     settings: {
-      ZoomOut: string;
-      ResetZoom: string;
-      ZoomIn: string;
-      Turn: string;
-      Calibrate: string;
-      Previous: string;
-      Generic: string;
-      Next: string;
+      zoomOut: string;
+      resetZoom: string;
+      zoomIn: string;
+      turn: string;
+      calibrate: string;
+      previous: string;
+      generic: string;
+      next: string;
     };
   };
   rightPanel: {

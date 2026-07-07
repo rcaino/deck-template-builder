@@ -20,21 +20,19 @@ export const localeES: ILocale = {
     newLayerDataButtonText: "Campo",
     sectionLayers: "Capas"
   },
-  /* traduzco a español las variables del panel central y configuracones */
-  /* propongo cambiar el canvas traducido como área de carta y no como lienzo */
   centralPanel: {
-    Project: "Proyecto",
-    NewProject: "Nuevo Proyecto",
-    Canvas: "Área de Carta",
+    project: "Proyecto",
+    newProject: "Nuevo Proyecto",
+    canvas: "Área de Carta",
     settings: {
-      ZoomOut: "Alejar",
-      ResetZoom: "Restablecer Zoom",
-      ZoomIn: "Acercar",
-      Turn: "Girar",
-      Calibrate: "Calibrar",
-      Previous: "Retroceder Cambio",
-      Generic: "Carta Base",
-      Next: "Avanzar Cambio"
+      zoomOut: "Alejar",
+      resetZoom: "Restablecer Zoom",
+      zoomIn: "Acercar",
+      turn: "Girar",
+      calibrate: "Calibrar",
+      previous: "Retroceder Cambio",
+      generic: "Carta Base",
+      next: "Avanzar Cambio"
     }
   },
   rightPanel: {
