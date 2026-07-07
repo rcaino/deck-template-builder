@@ -103,15 +103,14 @@ const CanvasControls: React.FC<CanvasControlsProps> = ({
       </div>
       <div style={{ textAlign: "center", verticalAlign: "middle" }}>
         <span>
-          {t("centralPanel.project")}
+          {t("centralPanel.project")}:{" "}
           {projectName && projectName !== "New Project"
             ? projectName
             : t("centralPanel.newProject")}
         </span>
         <br />
         <span>
-          {t("centralPanel.canvas")}
-          {canvasWidth}px × {canvasHeight}px
+          {t("centralPanel.canvas")}: {canvasWidth}px × {canvasHeight}px
         </span>
         <br />
         <span>
