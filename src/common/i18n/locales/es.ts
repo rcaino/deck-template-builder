@@ -30,7 +30,7 @@ export const localeES: ILocale = {
       zoomIn: "Acercar",
       turn: "Girar",
       calibrate: "Calibrar",
-      previous: "Previo"
+      previous: "Previo",
       generic: "Carta Base",
       next: "Siguiente"
     }
