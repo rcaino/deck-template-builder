@@ -21,6 +21,21 @@ export const localeEN: ILocale = {
     newLayerDataButtonText: "Data",
     sectionLayers: "Layers"
   },
+  centralPanel: {
+    project: "Project",
+    newProject: "New Project",
+    canvas: "Card Area",
+    settings: {
+      zoomOut: "Zoom Out",
+      resetZoom: "Reset Zoom",
+      zoomIn: "Zoom In",
+      turn: "Turn",
+      calibrate: "Calibrate",
+      previous: "Previous",
+      generic: "Generic Card",
+      next: "Next"
+    }
+  },
   rightPanel: {
     sectionLayerTitle: "Admin",
     removeLayerButtonText: "Remove Layer",

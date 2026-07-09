@@ -23,6 +23,21 @@ interface ILocale {
     newLayerDataButtonText: string;
     sectionLayers: string;
   };
+  centralPanel: {
+    project: string;
+    newProject: string;
+    canvas: string;
+    settings: {
+      zoomOut: string;
+      resetZoom: string;
+      zoomIn: string;
+      turn: string;
+      calibrate: string;
+      previous: string;
+      generic: string;
+      next: string;
+    };
+  };
   rightPanel: {
     tabStatic: { title: string };
     tabDynamic: { title: string };

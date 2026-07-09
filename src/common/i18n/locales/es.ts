@@ -20,6 +20,21 @@ export const localeES: ILocale = {
     newLayerDataButtonText: "Campo",
     sectionLayers: "Capas"
   },
+  centralPanel: {
+    project: "Proyecto",
+    newProject: "Nuevo Proyecto",
+    canvas: "Área de Carta",
+    settings: {
+      zoomOut: "Alejar",
+      resetZoom: "Restablecer Zoom",
+      zoomIn: "Acercar",
+      turn: "Girar",
+      calibrate: "Calibrar",
+      previous: "Previo"
+      generic: "Carta Base",
+      next: "Siguiente"
+    }
+  },
   rightPanel: {
     sectionLayerTitle: "Gestionar",
     removeLayerButtonText: "Quitar Capa",
