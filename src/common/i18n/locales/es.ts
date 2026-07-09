@@ -32,7 +32,7 @@ export const localeES: ILocale = {
       calibrate: "Calibrar",
       previous: "Previo"
       generic: "Carta Base",
-      next: "Avanzar Cambio"
+      next: "Siguiente"
     }
   },
   rightPanel: {
