@@ -5,8 +5,8 @@ import { ILocale } from "./ILocale";
 export type SupportedLocale = "es" | "en";
 
 class I18nManager {
-  public currentLocale: SupportedLocale = this.getSystemLocale();
-  public locales: Record<SupportedLocale, ILocale> = {
+  private currentLocale: SupportedLocale = this.getSystemLocale();
+  private locales: Record<SupportedLocale, ILocale> = {
     es: localeES,
     en: localeEN
   };
@@ -17,18 +17,6 @@ class I18nManager {
       return systemLang;
     }
     return "en"; // fallback
-  }
-
-  public setLocale(locale: SupportedLocale): void {
-    if (locale in this.locales) {
-      this.currentLocale = locale;
-    } else {
-      console.warn(`Locale "${locale}" not supported. Using default.`);
-    }
-  }
-
-  public getLocale(): SupportedLocale {
-    return this.currentLocale;
   }
 
   public t(key: string): string {
@@ -50,6 +38,27 @@ class I18nManager {
   public getSupportedLocales(): SupportedLocale[] {
     return Object.keys(this.locales) as SupportedLocale[];
   }
+
+  private listeners = new Set<() => void>();
+
+  public subscribe(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
+  public setLocale(locale: SupportedLocale): void {
+    if (locale in this.locales) {
+      this.currentLocale = locale;
+      this.listeners.forEach((trigger) => trigger());
+    } else {
+      console.warn(`Locale "${locale}" not supported. Using default.`);
+    }
+  }
+
+  public getLocale(): SupportedLocale {
+    return this.currentLocale;
+  }
 }
 
 export const i18n = new I18nManager();
+export type { ILocale } from "./ILocale";
