@@ -11,10 +11,10 @@ import LanguageSwitcher from "./language/languageSwitcher";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <LanguageSwitcher>
-      <ThemeSwitcher>
+    <ThemeSwitcher>
+      <LanguageSwitcher>
         <App />
-      </ThemeSwitcher>
-    </LanguageSwitcher>
+      </LanguageSwitcher>
+    </ThemeSwitcher>
   </StrictMode>
 );
