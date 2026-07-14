@@ -50,6 +50,7 @@ const DEFAULT_TEMPLATE_STATE: ITemplateStoreData = {
 interface ITemplateStore extends ITemplateStoreData {
   setProjectName: (name?: string) => void;
   setCanvasDimensions: (width: number, height: number, ppc: number) => void;
+  setPpc: (canvasPPC: number) => void;
   setLoading: (loading: boolean) => void;
   resetStore: () => void;
   swapXY: (bypassHistory?: boolean) => void;
@@ -65,8 +66,30 @@ export const useTemplateStore = create<ITemplateStore>((set, get) => ({
   ...DEFAULT_TEMPLATE_STATE,
 
   setProjectName: (name) => set({ projectName: name }),
+  setPpc: (canvasPPC: number) =>
+    set((state) => {
+      const updatedLayers = { ...state.layers };
+      if (updatedLayers.root) {
+        updatedLayers.root = {
+          ...updatedLayers.root,
+          ppc: canvasPPC
+        } as unknown as IComponentDefinition;
+      }
+      return { canvasPPC, layers: updatedLayers };
+    }),
   setCanvasDimensions: (width, height, ppc) =>
-    set({ canvasWidth: width, canvasHeight: height, canvasPPC: ppc }),
+    set((state) => {
+      const updatedLayers = { ...state.layers };
+      if (updatedLayers.root) {
+        updatedLayers.root = { ...updatedLayers.root, ppc } as unknown as IComponentDefinition;
+      }
+      return {
+        canvasWidth: width,
+        canvasHeight: height,
+        canvasPPC: ppc,
+        layers: updatedLayers
+      };
+    }),
   setLoading: (loading) => set({ isLoading: loading }),
   resetStore: () => {
     useHistoryStore.getState().clear();

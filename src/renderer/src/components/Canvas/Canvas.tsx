@@ -3,6 +3,7 @@ import { useTemplateStore } from "../../store/useTemplateStore";
 import { Content } from "antd/es/layout/layout";
 import CanvasControls from "./CanvasControls";
 import CanvasViewport from "./CanvasViewport";
+import { Calibrator } from "./Calibrator";
 
 const INITIAL_ZOOM = 1;
 const MIN_ZOOM = 0.5;
@@ -25,14 +26,26 @@ const contentStyle: React.CSSProperties = {
 
 const Canvas: React.FC = () => {
   const projectName = useTemplateStore((state) => state.projectName) || "Generic";
-  const canvasHeight = useTemplateStore((state) => state.canvasHeight);
-  const canvasWidth = useTemplateStore((state) => state.canvasWidth);
   const canvasPPC = useTemplateStore((state) => state.canvasPPC);
 
   // --- State Management ---
   const [zoomLevel, setZoomLevel] = useState<number>(INITIAL_ZOOM);
   const viewportRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
+
+  // --- Calibration State ---
+  const setCanvasDimensions = useTemplateStore((state) => state.setCanvasDimensions);
+  const canvasWidth = useTemplateStore((state) => state.canvasWidth);
+  const canvasHeight = useTemplateStore((state) => state.canvasHeight);
+  const [isCalibrating, setIsCalibrating] = useState<boolean>(false);
+
+  const handleSaveCalibration = (newPpc: number): void => {
+    setCanvasDimensions(canvasWidth, canvasHeight, newPpc);
+    setIsCalibrating(false);
+  };
+  const handleCalibrateClick = (): void => {
+    setIsCalibrating(true);
+  };
 
   // --- Zoom Helper Functions ---
   const constrainZoom = (zoom: number): number => {
@@ -164,6 +177,7 @@ const Canvas: React.FC = () => {
           onNext={handleNext}
           canvasHeight={canvasHeight}
           canvasPPC={canvasPPC}
+          onCalibrateClick={handleCalibrateClick}
           canvasWidth={canvasWidth}
           onSliderChange={handleSliderChange}
           projectName={projectName}
@@ -176,6 +190,12 @@ const Canvas: React.FC = () => {
           viewportRef={viewportRef}
           canvasRef={canvasRef}
         />
+        {isCalibrating && (
+          <Calibrator
+            onCalibrationComplete={handleSaveCalibration}
+            onCancel={(): void => setIsCalibrating(false)}
+          />
+        )}
       </div>
     </Content>
   );

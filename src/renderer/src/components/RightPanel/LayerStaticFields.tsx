@@ -1,17 +1,22 @@
-import React, { useState } from "react";
-import { Input, Space, InputNumber, Form, Collapse } from "antd";
+import React, { useEffect, useState } from "react";
+import { Input, Space, InputNumber, Form, Collapse, FormInstance } from "antd";
 import type { IComponentDefinition } from "@common/types";
 import { SmartImageUpload } from "../Inputs/SmartImageUpload";
 import { SmartColorPicker } from "../Inputs/SmartColorPicker";
 import CollapsePanel from "antd/es/collapse/CollapsePanel";
 import FontSelector from "../Inputs/FontSelector";
+import { useTemplateStore } from "../../store/useTemplateStore";
 
 interface ILayerFieldsProps {
   layer: IComponentDefinition;
   isForPrint: boolean;
+  form: FormInstance;
 }
 
-export const LayerStaticFields: React.FC<ILayerFieldsProps> = ({ layer, isForPrint }) => {
+export const LayerStaticFields: React.FC<ILayerFieldsProps> = ({ layer, isForPrint, form }) => {
+  const setCanvasDimensions = useTemplateStore((state) => state.setCanvasDimensions);
+  const canvasWidth = useTemplateStore((state) => state.canvasWidth);
+  const canvasHeight = useTemplateStore((state) => state.canvasHeight);
   const isRoot = layer.type === "root";
   const isDataLayer = layer.type === "data";
   const isTextOrNumeric = isDataLayer && ["text", "numeric"].includes(layer.dataType);
@@ -21,6 +26,14 @@ export const LayerStaticFields: React.FC<ILayerFieldsProps> = ({ layer, isForPri
   const [borderImage, setBorderImage] = useState<string>(
     layer.style.border?.["borderImage"] as string
   );
+  useEffect(() => {
+    if (isRoot) {
+      const rootData = layer as unknown as Record<string, unknown>;
+      form.setFieldsValue({
+        ppc: rootData.ppc
+      });
+    }
+  }, [layer, isRoot, form]);
 
   return (
     <>
@@ -29,7 +42,18 @@ export const LayerStaticFields: React.FC<ILayerFieldsProps> = ({ layer, isForPri
       </Form.Item>
       {isRoot && (
         <Form.Item name="ppc" label="PPC">
-          <InputNumber placeholder="ppc" />
+          <InputNumber
+            placeholder="ppc"
+            onChange={(value) => {
+              if (value && typeof value === "number") {
+                // 1. Forzamos al formulario de Antd a registrar el cambio visualmente
+                form.setFieldsValue({ ppc: value });
+
+                // 2. Transmitimos el cambio inmediatamente al store global
+                setCanvasDimensions(canvasWidth, canvasHeight, value);
+              }
+            }}
+          />
         </Form.Item>
       )}
       <Collapse accordion size="small">

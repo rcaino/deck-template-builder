@@ -19,6 +19,7 @@ interface CanvasControlsProps {
   onZoomOut: () => void;
   onResetZoom: () => void;
   onSliderChange: (value: number) => void;
+  onCalibrateClick: () => void;
   onPrevious: () => void;
   onNext: () => void;
   projectName: string;
@@ -43,6 +44,7 @@ const CanvasControls: React.FC<CanvasControlsProps> = ({
   onZoomOut,
   onResetZoom,
   onSliderChange,
+  onCalibrateClick,
   onPrevious,
   onNext,
   projectName,
@@ -80,7 +82,7 @@ const CanvasControls: React.FC<CanvasControlsProps> = ({
           />
           <Button
             icon={<BorderOuterOutlined />}
-            onClick={() => console.log("calibrate")}
+            onClick={onCalibrateClick}
             title={t("centralPanel.settings.calibrate")}
           />
         </Space>
@@ -114,7 +116,7 @@ const CanvasControls: React.FC<CanvasControlsProps> = ({
         </span>
         <br />
         <span>
-          {canvasWidth / canvasPPC}cm × {canvasHeight / canvasPPC}cm
+          {`${(canvasWidth / canvasPPC).toFixed(2)}cm 📐 ${(canvasHeight / canvasPPC).toFixed(2)}cm`}
         </span>
       </div>
       <div>

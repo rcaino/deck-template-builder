@@ -43,6 +43,9 @@ const RightPanel: React.FC = () => {
   const handleCheckboxChange = (e: CheckboxChangeEvent): void => {
     setIsForPrint(e.target.checked);
   };
+  const setCanvasDimensions = useTemplateStore((state) => state.setCanvasDimensions);
+  const canvasWidth = useTemplateStore((state) => state.canvasWidth);
+  const canvasHeight = useTemplateStore((state) => state.canvasHeight);
 
   const [form] = Form.useForm<IComponentDefinition>();
 
@@ -87,8 +90,15 @@ const RightPanel: React.FC = () => {
           layout="vertical"
           autoComplete="off"
           initialValues={currentLayer}
-          onFinish={(values: IComponentDefinition) => {
+          onFinish={(values) => {
             console.log(values);
+
+            if (selectedLayer === "root") {
+              const formData = form.getFieldsValue() as unknown as Record<string, unknown>;
+              if (formData && typeof formData.ppc === "number") {
+                setCanvasDimensions(canvasWidth, canvasHeight, formData.ppc);
+              }
+            }
           }}
         >
           <Tabs
@@ -101,7 +111,9 @@ const RightPanel: React.FC = () => {
                 },
                 label: t("rightPanel.tabStatic.title"),
                 key: "Static",
-                children: <LayerStaticFields isForPrint={isForPrint} layer={currentLayer} />
+                children: (
+                  <LayerStaticFields isForPrint={isForPrint} layer={currentLayer} form={form} />
+                )
               },
               {
                 label: t("rightPanel.tabDynamic.title"),
