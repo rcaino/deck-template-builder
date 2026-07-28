@@ -4,6 +4,9 @@ import { DataType, ILevelLayer } from "@common/types";
 import RootLayer from "./Layers/RootLayer";
 import AreaLayer from "./Layers/AreaLayer";
 import FieldLayer from "./Layers/FieldLayer";
+import { Modal, ConfigProvider } from "antd";
+import { Calibrate } from "./Layers/Calibrate";
+import { useLocalConfigStore } from "../../store/useLocalConfigStore";
 
 interface CanvasViewportProps {
   zoomLevel: number;
@@ -20,7 +23,8 @@ const viewportStyle: React.CSSProperties = {
   backgroundColor: "var(--ant-color-bg-layout)",
   width: "100%",
   height: "100%",
-  overflow: "auto"
+  overflow: "auto",
+  position: "relative"
 };
 
 const CanvasViewport: React.FC<CanvasViewportProps> = ({
@@ -33,13 +37,21 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
   viewportRef,
   cardData
 }) => {
+  const canvasLocalScaleToReal = useLocalConfigStore((state) => state.canvasLocalScaleToReal);
+  const isCalibrateModalOpen = useLocalConfigStore((state) => state.isCalibrateModalOpen);
+  const setIsCalibrateModalOpen = useLocalConfigStore((state) => state.setIsCalibrateModalOpen);
+
   const layers = useTemplateStore((state) => state.layers);
   const rootFromStore = layers["root"];
+
   const viewAdjustFactor =
-    (0.95 * 95 * window.devicePixelRatio) / (canvasPPC ? canvasPPC * 2.54 : (canvasPPI ?? 254));
+    (((96 / 2.54) * window.devicePixelRatio) /
+      (canvasPPC ?? (canvasPPI ? canvasPPI / 2.54 : 100))) *
+    canvasLocalScaleToReal;
 
   const finalScale = zoomLevel * viewAdjustFactor;
   const layerRef = useRef<HTMLDivElement>(null);
+
   const renderLayerChildren = (parentId: string): React.ReactNode[] => {
     return Object.values(layers)
       .filter((layer): layer is ILevelLayer => layer.type !== "root" && layer.parentId === parentId)
@@ -86,6 +98,31 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
       >
         {renderLayerChildren("root")}
       </RootLayer>
+
+      <ConfigProvider
+        theme={{
+          components: {
+            Modal: {
+              contentBg: "transparent",
+              paddingMD: 0,
+              paddingLG: 0,
+              boxShadow: "none"
+            }
+          }
+        }}
+      >
+        <Modal
+          open={isCalibrateModalOpen}
+          onCancel={() => setIsCalibrateModalOpen(false)}
+          footer={null}
+          closable={false}
+          centered
+          destroyOnClose
+          width={825}
+        >
+          <Calibrate onClose={() => setIsCalibrateModalOpen(false)} />
+        </Modal>
+      </ConfigProvider>
     </div>
   );
 };
