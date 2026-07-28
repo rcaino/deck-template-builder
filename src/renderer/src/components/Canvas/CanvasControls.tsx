@@ -12,6 +12,7 @@ import {
 } from "@ant-design/icons";
 import { useTemplateStore } from "../../store/useTemplateStore";
 import { useI18n } from "../../hooks/useI18n";
+import { useLocalConfigStore } from "../../store/useLocalConfigStore";
 
 interface CanvasControlsProps {
   zoomLevel: number;
@@ -52,6 +53,7 @@ const CanvasControls: React.FC<CanvasControlsProps> = ({
 }) => {
   const { t } = useI18n();
   const swapXY = useTemplateStore((state) => state.swapXY);
+  const setIsCalibrateModalOpen = useLocalConfigStore((state) => state.setIsCalibrateModalOpen);
   return (
     <div style={containerStyle}>
       <div>
@@ -80,7 +82,7 @@ const CanvasControls: React.FC<CanvasControlsProps> = ({
           />
           <Button
             icon={<BorderOuterOutlined />}
-            onClick={() => console.log("calibrate")}
+            onClick={() => setIsCalibrateModalOpen(true)}
             title={t("centralPanel.settings.calibrate")}
           />
         </Space>
