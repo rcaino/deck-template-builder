@@ -3,7 +3,12 @@ import { electronAPI } from "@electron-toolkit/preload";
 
 // Custom APIs for renderer
 const api = {
-  getAvailableFonts: () => ipcRenderer.invoke("get-available-fonts")
+  getAvailableFonts: () => ipcRenderer.invoke("get-available-fonts"),
+
+  updateLocalConfig: (config: { canvasLocalScaleToReal: number }) =>
+    ipcRenderer.invoke("update-local-config", config),
+
+  getLocalConfig: () => ipcRenderer.invoke("get-local-config")
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

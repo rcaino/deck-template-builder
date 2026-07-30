@@ -4,9 +4,17 @@ import os from "os";
 import path from "path";
 import { IFontInfo } from "../../common/types";
 
+const CONFIG_PATH = path.join(app.getPath("userData"), "local-config.json");
+
 const FONTS_DIR = app.isPackaged
   ? path.join(process.resourcesPath, "fonts")
   : path.join(__dirname, "../../resources/fonts");
+
+const ensureConfigFile = (): void => {
+  if (!fs.existsSync(CONFIG_PATH)) {
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify({ canvasLocalScaleToReal: 1.0 }, null, 2));
+  }
+};
 
 const getSystemFontFiles = (): { name: string; path: string }[] => {
   const platform = os.platform();
@@ -15,7 +23,6 @@ const getSystemFontFiles = (): { name: string; path: string }[] => {
   if (platform === "win32") {
     fontDirs = [path.join(process.env.WINDIR || "C:\\Windows", "Fonts")];
   } else if (platform === "darwin") {
-    // macOS
     fontDirs = [
       "/Library/Fonts",
       "/System/Library/Fonts",
@@ -46,6 +53,7 @@ const getSystemFontFiles = (): { name: string; path: string }[] => {
 
 class FontApi {
   static registerFontApiHandlers = (): void => {
+    // 1. Handler existente de fuentes
     ipcMain.handle("get-available-fonts", async (): Promise<IFontInfo[]> => {
       try {
         const localFiles = fs
@@ -65,6 +73,41 @@ class FontApi {
       } catch (error) {
         console.error("Font read error:", error);
         return [];
+      }
+    });
+
+    ipcMain.handle("update-local-config", async (_event, config): Promise<{ success: boolean }> => {
+      try {
+        ensureConfigFile();
+
+        const currentData = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
+
+        const updatedData = {
+          ...currentData,
+          canvasLocalScaleToReal: config.canvasLocalScaleToReal
+        };
+
+        fs.writeFileSync(CONFIG_PATH, JSON.stringify(updatedData, null, 2), "utf-8");
+        console.log("Configuración guardada en:", CONFIG_PATH);
+
+        return { success: true };
+      } catch (error) {
+        console.error("Error al guardar la configuración desde fonts.ts:", error);
+        throw error;
+      }
+    });
+
+    ipcMain.handle("get-local-config", async (): Promise<{ canvasLocalScaleToReal: number }> => {
+      try {
+        ensureConfigFile();
+        const currentData = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
+
+        return {
+          canvasLocalScaleToReal: currentData.canvasLocalScaleToReal ?? 1.0
+        };
+      } catch (error) {
+        console.error("Error al leer la configuración desde fonts.ts:", error);
+        return { canvasLocalScaleToReal: 1.0 }; // Sure Fallback
       }
     });
   };

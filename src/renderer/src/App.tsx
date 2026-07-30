@@ -4,7 +4,7 @@ import Canvas from "./components/Canvas/Canvas";
 import LeftPanel from "./components/LeftPanel/LeftPanel";
 import RightPanel from "./components/RightPanel/RightPanel";
 import { useFontStore } from "./store/useFontStore";
-import { useEffect } from "react";
+import { useLocalConfigStore } from "./store/useLocalConfigStore";
 
 const layoutStyle: React.CSSProperties = {
   borderRadius: 8,
@@ -15,13 +15,10 @@ const layoutStyle: React.CSSProperties = {
   bottom: 0
 };
 
+useFontStore.getState().loadFonts();
+useLocalConfigStore.getState().loadLocalConfig();
+
 function App(): React.JSX.Element {
-  const loadFonts = useFontStore((state) => state.loadFonts);
-
-  useEffect(() => {
-    loadFonts();
-  }, [loadFonts]);
-
   return (
     <Layout style={layoutStyle}>
       <Navbar />
