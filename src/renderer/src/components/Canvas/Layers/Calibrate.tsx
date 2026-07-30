@@ -8,7 +8,9 @@ interface CalibrateProps {
 }
 
 export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
-  const { canvasLocalScaleToReal, setCanvasLocalScaleToReal } = useLocalConfigStore();
+  const canvasLocalScaleToReal = useLocalConfigStore((state) => state.canvasLocalScaleToReal);
+  const setCanvasLocalScaleToReal = useLocalConfigStore((state) => state.setCanvasLocalScaleToReal);
+
   const [tempMultiplier, setTempMultiplier] = useState<number>(canvasLocalScaleToReal);
 
   const CARD_WIDTH_CM = 8.56;
@@ -19,16 +21,7 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
   const visualHeight = CARD_HEIGHT_CM * CM_TO_PX * window.devicePixelRatio * tempMultiplier;
 
   const handleConfirm = async (): Promise<void> => {
-    setCanvasLocalScaleToReal(tempMultiplier);
-    try {
-      await fetch("http://localhost:3000/LocalConfig", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ canvasLocalScaleToReal: tempMultiplier })
-      });
-    } catch (error) {
-      console.error("Error guardando configuración:", error);
-    }
+    await setCanvasLocalScaleToReal(tempMultiplier);
     onClose();
   };
 
@@ -40,7 +33,9 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
         color: "#B4B7BD",
         padding: "30px",
         borderRadius: "1px",
-        border: "1px solid #324e9c"
+        border: "1px solid #324e9c",
+        width: "100%",
+        boxSizing: "border-box"
       }}
     >
       <h3 style={{ color: "#FFFFFF", margin: "0 0 8px 0", fontSize: "16px", fontWeight: 500 }}>
@@ -53,16 +48,19 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
 
       <div
         style={{
-          height: "460px",
-          width: "720px",
+          height: "70vh",
+          maxHeight: "460px",
+          width: "100%",
+          maxWidth: "720px",
           margin: "0 auto 24px auto",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          marginBottom: "24px",
           backgroundColor: "#0F1422",
           borderRadius: "4px",
-          boxSizing: "border-box"
+          boxSizing: "border-box",
+          overflow: "auto",
+          padding: "40px"
         }}
       >
         <div
@@ -71,29 +69,35 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
             height: `${visualHeight}px`,
             border: "1px dashed #7367F0",
             borderRadius: "4px",
-            position: "relative"
+            position: "relative",
+            flexShrink: 0
           }}
         >
           <span
             style={{
               position: "absolute",
-              bottom: "-22px",
-              left: "50%",
-              transform: "translateX(-50%)",
+              bottom: "-25px",
+              left: "0",
+              right: "0",
+              textAlign: "center",
               fontSize: "11px",
-              color: "#676D7D"
+              color: "#676D7D",
+              whiteSpace: "nowrap"
             }}
           >
             {CARD_WIDTH_CM} cm
           </span>
+
           <span
             style={{
               position: "absolute",
-              right: "-52px",
+              right: "-10px",
               top: "50%",
-              transform: "translateY(-50%) rotate(90deg)",
+              transform: "translate(100%, -50%) rotate(90deg)",
+              transformOrigin: "left center",
               fontSize: "11px",
-              color: "#676D7D"
+              color: "#676D7D",
+              whiteSpace: "nowrap"
             }}
           >
             {CARD_HEIGHT_CM} cm
