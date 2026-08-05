@@ -5,7 +5,7 @@ import { electronAPI } from "@electron-toolkit/preload";
 const api = {
   getAvailableFonts: () => ipcRenderer.invoke("get-available-fonts"),
 
-  updateLocalConfig: (config: { canvasLocalScaleToReal: number }) =>
+  updateLocalConfig: (config: { canvasLocalScaleToReal: { x: number; y: number } }) =>
     ipcRenderer.invoke("update-local-config", config),
 
   getLocalConfig: () => ipcRenderer.invoke("get-local-config")

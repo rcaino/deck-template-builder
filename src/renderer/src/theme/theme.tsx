@@ -58,7 +58,10 @@ export const lightTheme: ThemeConfig = {
       colorBgBase: "#a5a0a580",
       cardBg: "#a5adad",
       colorBorderBg: "#334155"
-    }
+    } //,
+    // Modal: {
+    //   colorBgBase
+    // }
   }
 };
 

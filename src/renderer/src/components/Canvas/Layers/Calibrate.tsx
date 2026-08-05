@@ -11,17 +11,30 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
   const canvasLocalScaleToReal = useLocalConfigStore((state) => state.canvasLocalScaleToReal);
   const setCanvasLocalScaleToReal = useLocalConfigStore((state) => state.setCanvasLocalScaleToReal);
 
-  const [tempMultiplier, setTempMultiplier] = useState<number>(canvasLocalScaleToReal);
+  const [widthMultiplier, setWidthMultiplier] = useState<number>(canvasLocalScaleToReal?.x || 1.0);
+  const [heightMultiplier, setHeightMultiplier] = useState<number>(
+    canvasLocalScaleToReal?.y || 1.0
+  );
+
+  const [showWidthTooltip, setShowWidthTooltip] = useState<boolean>(false);
+  const [showHeightTooltip, setShowHeightTooltip] = useState<boolean>(false);
 
   const CARD_WIDTH_CM = 8.56;
   const CARD_HEIGHT_CM = 5.398;
   const CM_TO_PX = 96 / 2.54;
+  const MAX_SCALE = 1.5;
 
-  const visualWidth = CARD_WIDTH_CM * CM_TO_PX * window.devicePixelRatio * tempMultiplier;
-  const visualHeight = CARD_HEIGHT_CM * CM_TO_PX * window.devicePixelRatio * tempMultiplier;
+  const visualWidth = CARD_WIDTH_CM * CM_TO_PX * window.devicePixelRatio * widthMultiplier;
+  const visualHeight = CARD_HEIGHT_CM * CM_TO_PX * window.devicePixelRatio * heightMultiplier;
+
+  const maxCardWidth = CARD_WIDTH_CM * CM_TO_PX * window.devicePixelRatio * MAX_SCALE;
+  const maxCardHeight = CARD_HEIGHT_CM * CM_TO_PX * window.devicePixelRatio * MAX_SCALE;
 
   const handleConfirm = async (): Promise<void> => {
-    await setCanvasLocalScaleToReal(tempMultiplier);
+    await setCanvasLocalScaleToReal({
+      x: widthMultiplier,
+      y: heightMultiplier
+    });
     onClose();
   };
 
@@ -31,10 +44,11 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
         textAlign: "center",
         backgroundColor: "#161D31",
         color: "#B4B7BD",
-        padding: "30px",
+        padding: "20px",
         borderRadius: "1px",
         border: "1px solid #324e9c",
-        width: "100%",
+        width: "fit-content",
+        margin: "0 auto",
         boxSizing: "border-box"
       }}
     >
@@ -43,107 +57,197 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
       </h3>
 
       <p style={{ fontSize: "12px", color: "#676D7D", marginBottom: "24px", lineHeight: "1.4" }}>
-        Coloque su tarjeta física sobre la pantalla y mueva la barra hasta que la silueta coincida.
+        Coloque su tarjeta física sobre la pantalla y mueva las barras hasta que la silueta
+        coincida.
       </p>
 
       <div
         style={{
-          height: "70vh",
-          maxHeight: "460px",
-          width: "100%",
-          maxWidth: "720px",
+          display: "grid",
+          gridTemplateColumns: "1fr 40px",
+          gridTemplateRows: "auto 40px",
+          gap: "16px",
+          width: `${maxCardWidth + 50 + 40 + 16}px`,
           margin: "0 auto 24px auto",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#0F1422",
-          borderRadius: "4px",
-          boxSizing: "border-box",
-          overflow: "auto",
-          padding: "40px"
+          boxSizing: "border-box"
         }}
       >
         <div
           style={{
-            width: `${visualWidth}px`,
-            height: `${visualHeight}px`,
-            border: "1px dashed #7367F0",
+            gridArea: "1 / 1 / 2 / 2",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#0F1422",
             borderRadius: "4px",
-            position: "relative",
-            flexShrink: 0
+            boxSizing: "border-box",
+            width: `${maxCardWidth + 50}px`,
+            height: `${maxCardHeight + 50}px`,
+            margin: "0 auto",
+            position: "relative"
           }}
         >
-          <span
+          <div
             style={{
-              position: "absolute",
-              bottom: "-25px",
-              left: "0",
-              right: "0",
-              textAlign: "center",
-              fontSize: "11px",
-              color: "#676D7D",
-              whiteSpace: "nowrap"
+              width: `${visualWidth}px`,
+              height: `${visualHeight}px`,
+              border: "1px dashed #7367F0",
+              borderRadius: "4px",
+              position: "relative",
+              flexShrink: 0,
+              transition: "width 0.1s ease, height 0.1s ease"
             }}
           >
-            {CARD_WIDTH_CM} cm
-          </span>
+            <span
+              style={{
+                position: "absolute",
+                bottom: "8px",
+                left: "0",
+                right: "0",
+                textAlign: "center",
+                fontSize: "11px",
+                color: "#7367F0",
+                fontWeight: "500",
+                whiteSpace: "nowrap",
+                pointerEvents: "none"
+              }}
+            >
+              {CARD_WIDTH_CM} cm
+            </span>
 
-          <span
-            style={{
-              position: "absolute",
-              right: "-10px",
-              top: "50%",
-              transform: "translate(100%, -50%) rotate(90deg)",
-              transformOrigin: "left center",
-              fontSize: "11px",
-              color: "#676D7D",
-              whiteSpace: "nowrap"
-            }}
-          >
-            {CARD_HEIGHT_CM} cm
-          </span>
+            <span
+              style={{
+                position: "absolute",
+                right: "8px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                fontSize: "11px",
+                color: "#7367F0",
+                fontWeight: "500",
+                whiteSpace: "nowrap",
+                pointerEvents: "none",
+                writingMode: "vertical-rl"
+              }}
+            >
+              {CARD_HEIGHT_CM} cm
+            </span>
+          </div>
         </div>
-      </div>
 
-      <div style={{ marginBottom: "24px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "0 8px" }}>
-          <ZoomOutOutlined
+        <div
+          style={{
+            gridArea: "1 / 2 / 2 / 3",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "12px 0",
+            boxSizing: "border-box",
+            height: "100%"
+          }}
+          onMouseEnter={() => setShowHeightTooltip(true)}
+          onMouseLeave={() => setShowHeightTooltip(false)}
+        >
+          <ZoomInOutlined
             style={{
-              color: tempMultiplier <= 0.5 ? "#3d4251" : "#676D7D",
+              color: heightMultiplier >= 1.5 ? "#3d4251" : "#676D7D",
               fontSize: "16px",
-              cursor: tempMultiplier <= 0.5 ? "not-allowed" : "pointer"
+              cursor: heightMultiplier >= 1.5 ? "not-allowed" : "pointer"
             }}
             onClick={() => {
-              if (tempMultiplier > 0.5) {
-                setTempMultiplier(Number((tempMultiplier - 0.01).toFixed(2)));
+              if (heightMultiplier < 1.5) {
+                setHeightMultiplier(Number((heightMultiplier + 0.01).toFixed(2)));
+              }
+            }}
+          />
+          <Slider
+            vertical
+            min={0.5}
+            max={1.5}
+            step={0.01}
+            value={heightMultiplier}
+            onChange={(value) => setHeightMultiplier(value as number)}
+            style={{ flex: 1, margin: "12px 0" }}
+            tooltip={{
+              formatter: (v) => `Alto: x${v?.toFixed(2)}`,
+              open: showHeightTooltip
+            }}
+          />
+          <ZoomOutOutlined
+            style={{
+              color: heightMultiplier <= 0.5 ? "#3d4251" : "#676D7D",
+              fontSize: "16px",
+              cursor: heightMultiplier <= 0.5 ? "not-allowed" : "pointer"
+            }}
+            onClick={() => {
+              if (heightMultiplier > 0.5) {
+                setHeightMultiplier(Number((heightMultiplier - 0.01).toFixed(2)));
+              }
+            }}
+          />
+        </div>
+
+        <div
+          style={{
+            gridArea: "2 / 1 / 3 / 2",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "0 12px",
+            width: `${maxCardWidth + 50}px`,
+            margin: "0 auto",
+            boxSizing: "border-box"
+          }}
+          onMouseEnter={() => setShowWidthTooltip(true)}
+          onMouseLeave={() => setShowWidthTooltip(false)}
+        >
+          <ZoomOutOutlined
+            style={{
+              color: widthMultiplier <= 0.5 ? "#3d4251" : "#676D7D",
+              fontSize: "16px",
+              cursor: widthMultiplier <= 0.5 ? "not-allowed" : "pointer"
+            }}
+            onClick={() => {
+              if (widthMultiplier > 0.5) {
+                setWidthMultiplier(Number((widthMultiplier - 0.01).toFixed(2)));
               }
             }}
           />
           <Slider
             min={0.5}
-            max={2}
+            max={1.5}
             step={0.01}
-            value={tempMultiplier}
-            onChange={(value) => setTempMultiplier(value as number)}
-            style={{ flex: 1, margin: "10px 0" }}
-            tooltip={{ formatter: (v) => `x${v?.toFixed(2)}` }}
+            value={widthMultiplier}
+            onChange={(value) => setWidthMultiplier(value as number)}
+            style={{ flex: 1, margin: 0 }}
+            tooltip={{
+              formatter: (v) => `Ancho: x${v?.toFixed(2)}`,
+              open: showWidthTooltip
+            }}
           />
           <ZoomInOutlined
             style={{
-              color: tempMultiplier >= 2.0 ? "#3d4251" : "#676D7D",
+              color: widthMultiplier >= 1.5 ? "#3d4251" : "#676D7D",
               fontSize: "16px",
-              cursor: tempMultiplier >= 2.0 ? "not-allowed" : "pointer"
+              cursor: widthMultiplier >= 1.5 ? "not-allowed" : "pointer"
             }}
             onClick={() => {
-              if (tempMultiplier < 2.0) {
-                setTempMultiplier(Number((tempMultiplier + 0.01).toFixed(2)));
+              if (widthMultiplier < 1.5) {
+                setWidthMultiplier(Number((widthMultiplier + 0.01).toFixed(2)));
               }
             }}
           />
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "12px" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "12px",
+          width: `${maxCardWidth + 50 + 40 + 16}px`,
+          margin: "0 auto"
+        }}
+      >
         <Button
           onClick={onClose}
           style={{
