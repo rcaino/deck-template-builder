@@ -6,8 +6,11 @@ declare global {
     electron: ElectronAPI;
     api: {
       getAvailableFonts: () => Promise<FontInfo[]>;
-      updateLocalConfig: (config: { canvasLocalScaleToReal: number }) => Promise<void>;
-      getLocalConfig: () => Promise<{ canvasLocalScaleToReal: number }>;
+      // 👇 Actualizado de 'number' a un objeto con coordenadas X e Y
+      updateLocalConfig: (config: {
+        canvasLocalScaleToReal: { x: number; y: number };
+      }) => Promise<void>;
+      getLocalConfig: () => Promise<{ canvasLocalScaleToReal: { x: number; y: number } }>;
     };
   }
 }

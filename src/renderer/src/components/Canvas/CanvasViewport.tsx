@@ -44,12 +44,20 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
   const layers = useTemplateStore((state) => state.layers);
   const rootFromStore = layers["root"];
 
-  const viewAdjustFactor =
-    (((96 / 2.54) * window.devicePixelRatio) /
-      (canvasPPC ?? (canvasPPI ? canvasPPI / 2.54 : 100))) *
-    canvasLocalScaleToReal;
+  // 1. MODIFICACIÓN: Base común del factor de conversión a píxeles reales
+  const baseAdjustFactor =
+    ((96 / 2.54) * window.devicePixelRatio) / (canvasPPC ?? (canvasPPI ? canvasPPI / 2.54 : 100));
 
-  const finalScale = zoomLevel * viewAdjustFactor;
+  // 2. MODIFICACIÓN: Separación del cálculo de escalas finales en dos ejes (X e Y)
+  // POR QUÉ: Multiplicamos el factor base y el zoomLevel por las coordenadas independientes
+  // de 'canvasLocalScaleToReal.x' y 'canvasLocalScaleToReal.y' provenientes del Zustand Store.
+  const finalScaleX = zoomLevel * baseAdjustFactor * (canvasLocalScaleToReal?.x || 1.0);
+  const finalScaleY = zoomLevel * baseAdjustFactor * (canvasLocalScaleToReal?.y || 1.0);
+
+  // 3. MODIFICACIÓN: Empaquetar las escalas en un objeto unificado
+  // POR QUÉ: Permite enviar ambas dimensiones juntas a través de las propiedades de las capas.
+  const finalScaleObject = { x: finalScaleX, y: finalScaleY };
+
   const layerRef = useRef<HTMLDivElement>(null);
 
   const renderLayerChildren = (parentId: string): React.ReactNode[] => {
@@ -59,7 +67,14 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
       .map((layer) => {
         if (layer.type === "area") {
           return (
-            <AreaLayer ref={layerRef} key={layer.id} {...layer} scale={finalScale} isRoot={false}>
+            /* 4. MODIFICACIÓN: Cambiado 'scale={finalScale}' por 'scale={finalScaleObject}' */
+            <AreaLayer
+              ref={layerRef}
+              key={layer.id}
+              {...layer}
+              scale={finalScaleObject}
+              isRoot={false}
+            >
               {renderLayerChildren(layer.id)}
             </AreaLayer>
           );
@@ -67,11 +82,12 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
 
         if (layer.type === "data") {
           return (
+            /* 5. MODIFICACIÓN: Cambiado 'scale={finalScale}' por 'scale={finalScaleObject}' */
             <FieldLayer
               ref={layerRef}
               key={layer.id}
               {...layer}
-              scale={finalScale}
+              scale={finalScaleObject}
               cardData={cardData}
             />
           );
@@ -83,6 +99,7 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
 
   return (
     <div style={viewportStyle} ref={viewportRef}>
+      {/* 6. MODIFICACIÓN: Cambiado 'scale={finalScale}' por 'scale={finalScaleObject}' */}
       <RootLayer
         layerProps={{
           style: rootFromStore?.style,
@@ -93,7 +110,7 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
           type: "root",
           ppc: canvasPPC ?? (canvasPPI ?? 254) / 2.54
         }}
-        scale={finalScale}
+        scale={finalScaleObject}
         ref={canvasRef}
       >
         {renderLayerChildren("root")}

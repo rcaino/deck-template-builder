@@ -19,9 +19,8 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
     position: "absolute",
     top: 0,
     left: 0,
-    width: size.width * scale,
-    height: size.height * scale,
-    // objectFit: "cover",
+    width: size.width * scale.x,
+    height: size.height * scale.y,
     pointerEvents: "none"
   };
 
@@ -36,14 +35,14 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
     backgroundPosition: "0 0, 20px 20px",
     cursor: "crosshair",
     position: "relative",
-    width: size.width * scale,
-    height: size.height * scale
+    width: size.width * scale.x,
+    height: size.height * scale.y
   };
 
   const rootStyles: React.CSSProperties = {
     position: "relative",
-    width: size.width * scale,
-    height: size.height * scale,
+    width: size.width * scale.x,
+    height: size.height * scale.y,
     margin: 0,
     padding: 0,
     overflow: "hidden"
@@ -53,6 +52,15 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
   const backgroundColor = (!hasBackgroundImage && { backgroundColor: style.backgroundColor }) || {};
 
   const hasBorder = style.border != undefined;
+
+  // Extraemos las propiedades de manera segura tipándolas como un registro de datos desconocido
+  const borderProperties = style.border as unknown as Record<string, unknown>;
+
+  // Evaluamos el borderWidth numérico de forma segura antes de multiplicarlo por la escala
+  const computedBorderWidth =
+    typeof borderProperties?.borderWidth === "number"
+      ? borderProperties.borderWidth * scale.x
+      : undefined;
 
   return (
     <div style={canvasStyles} className="canvas-container">
@@ -75,14 +83,16 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
         )}
         {hasBorder && (
           <span
-            style={{
-              ...backgroundImgStyle,
-              ...style.border,
-              ...{
-                borderWidth: style.border.borderWidth * scale,
-                borderImage: `url(" ${style.border?.["borderImage"]}")`
-              }
-            }}
+            style={
+              {
+                ...backgroundImgStyle,
+                ...borderProperties,
+                borderWidth: computedBorderWidth,
+                borderImage: borderProperties?.borderImage
+                  ? `url("${borderProperties.borderImage}")`
+                  : undefined
+              } as React.CSSProperties
+            }
           />
         )}
         {children}
