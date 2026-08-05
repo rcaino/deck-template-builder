@@ -72,6 +72,23 @@ export const localeEN: ILocale = {
   },
   fields: {
     newAreaLayer: "New Area",
-    newFieldLayer: "New Field"
+    newFieldLayer: "New Field",
+    props: {
+      layerName: "Layer",
+      coords: { header: "Position", x: "X", y: "Y" },
+      size: { header: "Size", width: "Width", height: "Height" },
+      font: {
+        typo: "Typography",
+        family: "Family",
+        color: "Color",
+        size: "Size",
+        selector: {
+          local: "Local",
+          system: "System"
+        }
+      },
+      background: { header: "Background", color: "Background Color", image: "Background Image" },
+      border: { header: "Border", color: "Border Color", image: "Border Image" }
+    }
   }
 };
