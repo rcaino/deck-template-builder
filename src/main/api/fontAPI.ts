@@ -11,6 +11,58 @@ const FONTS_DIR = app.isPackaged
 
 const validExtensions = new Set([".ttf", ".otf", ".ttc"]);
 
+const checkIsSymbolFont = (buffer: Buffer): boolean => {
+  try {
+    if (buffer.length < 12) return false;
+
+    const sfntVersion = buffer.toString("hex", 0, 4);
+    let numTables = 0;
+    let searchOffset = 12;
+
+    // sfntVersion == 74746366 => collection .ttcf:
+    if (sfntVersion === "74746366") {
+      if (buffer.length < 16) return false;
+      const fontOffset = buffer.readUInt32BE(12);
+      if (buffer.length < fontOffset + 12) return false;
+      numTables = buffer.readUInt16BE(fontOffset + 4);
+      searchOffset = fontOffset + 12;
+    } else {
+      numTables = buffer.readUInt16BE(4);
+    }
+
+    let cmapOffset = 0;
+    for (let i = 0; i < numTables; i++) {
+      const entryOffset = searchOffset + i * 16;
+      if (entryOffset + 16 > buffer.length) break;
+      const tag = buffer.toString("ascii", entryOffset, entryOffset + 4);
+      if (tag === "cmap") {
+        cmapOffset = buffer.readUInt32BE(entryOffset + 8);
+        break;
+      }
+    }
+
+    if (cmapOffset === 0 || cmapOffset + 4 > buffer.length) return false;
+
+    const numSubtables = buffer.readUInt16BE(cmapOffset + 2);
+    const subtablesOffset = cmapOffset + 4;
+
+    for (let i = 0; i < numSubtables; i++) {
+      const subtableEntry = subtablesOffset + i * 8;
+      if (subtableEntry + 8 > buffer.length) break;
+
+      const platformID = buffer.readUInt16BE(subtableEntry);
+      const encodingID = buffer.readUInt16BE(subtableEntry + 2);
+
+      if (platformID === 3 && encodingID === 0) {
+        return true;
+      }
+    }
+  } catch {
+    return false;
+  }
+  return false;
+};
+
 const getSystemFontFiles = (): { name: string; path: string }[] => {
   const platform = os.platform();
   let fontDirs: string[] = [];
@@ -22,7 +74,6 @@ const getSystemFontFiles = (): { name: string; path: string }[] => {
       path.join(localAppData, "Microsoft\\Windows\\Fonts")
     ];
   } else if (platform === "darwin") {
-    // macOS
     fontDirs = [
       "/Library/Fonts",
       "/System/Library/Fonts",
@@ -46,8 +97,12 @@ const getSystemFontFiles = (): { name: string; path: string }[] => {
             const font = create(buffer);
             const fontObj = font.isCollection ? font.fonts[0] : font;
 
+            const name = checkIsSymbolFont(buffer)
+              ? path.parse(file).name
+              : fontObj.fullName || path.parse(file).name;
+
             systemFonts.push({
-              name: fontObj.fullName,
+              name,
               path: filePath
             });
           } catch (e) {

@@ -31,12 +31,10 @@ const FontSelector: React.FC<FontSelectorProps> = ({ value, onChange }): ReactEl
   ];
 
   const handleRender = (option: DefaultOptionType): React.ReactNode => {
-    if (!option.value) return option.label;
-
     return (
       <span
         style={{
-          fontFamily: `"${option.label}"`,
+          fontFamily: option.value ? `"${option.label}"` : "inherit",
           fontSize: "14px"
         }}
       >
@@ -51,9 +49,9 @@ const FontSelector: React.FC<FontSelectorProps> = ({ value, onChange }): ReactEl
       onChange={onChangeHandler}
       options={options}
       showSearch={true}
-      placeholder="Selecciona una fuente"
       style={{ width: "100%" }}
       optionRender={handleRender}
+      labelRender={handleRender}
     />
   );
 };
