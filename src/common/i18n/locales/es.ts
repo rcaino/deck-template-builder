@@ -71,6 +71,23 @@ export const localeES: ILocale = {
   },
   fields: {
     newAreaLayer: "Nuevo Área",
-    newFieldLayer: "Nuevo Campo"
+    newFieldLayer: "Nuevo Campo",
+    props: {
+      layerName: "Capa",
+      coords: { header: "Posición", x: "X", y: "Y" },
+      size: { header: "Tamaño", width: "Ancho", height: "Alto" },
+      font: {
+        typo: "Tipografía",
+        family: "Fuente",
+        color: "Color",
+        size: "Tamaño",
+        selector: {
+          local: "Local",
+          system: "Sistema"
+        }
+      },
+      background: { header: "Fondo", color: "Color de Fondo", image: "Imagen de Fondo" },
+      border: { header: "Borde", color: "Color de Borde", image: "Imagen de Borde" }
+    }
   }
 };

@@ -75,6 +75,23 @@ interface ILocale {
   fields: {
     newAreaLayer: string;
     newFieldLayer: string;
+    props: {
+      layerName: string;
+      coords: { header: string; x: string; y: string };
+      size: { header: string; width: string; height: string };
+      font: {
+        typo: string;
+        family: string;
+        color: string;
+        size: string;
+        selector: {
+          local: string;
+          system: string;
+        };
+      };
+      background: { header: string; color: string; image: string };
+      border: { header: string; color: string; image: string };
+    };
   };
 }
 
