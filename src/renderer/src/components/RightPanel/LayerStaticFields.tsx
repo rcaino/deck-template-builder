@@ -79,17 +79,15 @@ export const LayerStaticFields: React.FC<ILayerFieldsProps> = ({ layer, isForPri
               <Form.Item name="borderColor" label={t("fields.props.border.color")}>
                 <SmartColorPicker isForPrint={isForPrint} />
               </Form.Item>
-              <Form.Item label="Border Image" style={{ marginBottom: 0 }}>
-                <Space.Compact>
-                  <Form.Item
-                    name={"borderImage"}
-                    valuePropName="style.border.borderImage"
-                    label={t("fields.props.border.image")}
-                  >
-                    <SmartImageUpload value={borderImage} onChange={setBorderImage} />
-                  </Form.Item>
-                </Space.Compact>
-              </Form.Item>
+              <Space.Compact>
+                <Form.Item
+                  name={"borderImage"}
+                  valuePropName="style.border.borderImage"
+                  label={t("fields.props.border.image")}
+                >
+                  <SmartImageUpload value={borderImage} onChange={setBorderImage} />
+                </Form.Item>
+              </Space.Compact>
             </>
           </CollapsePanel>
         )}
