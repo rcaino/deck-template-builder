@@ -37,3 +37,7 @@ export interface IFontInfo {
   path: string;
   type: "local" | "system";
 }
+
+export interface IAppConfig {
+  canvasLocalScaleToReal: { x: number; y: number };
+}
