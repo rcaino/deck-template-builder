@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Slider, Button } from "antd";
+import { Slider, Button, theme } from "antd";
 import { ZoomInOutlined, ZoomOutOutlined } from "@ant-design/icons";
 import { useLocalConfigStore } from "../../../store/useLocalConfigStore";
 
@@ -8,6 +8,8 @@ interface CalibrateProps {
 }
 
 export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
+  const { token } = theme.useToken();
+
   const canvasLocalScaleToReal = useLocalConfigStore((state) => state.canvasLocalScaleToReal);
   const setCanvasLocalScaleToReal = useLocalConfigStore((state) => state.setCanvasLocalScaleToReal);
 
@@ -42,21 +44,30 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
     <div
       style={{
         textAlign: "center",
-        backgroundColor: "#161D31",
-        color: "#B4B7BD",
+        backgroundColor: token.colorBgLayout,
+        color: token.colorText,
         padding: "20px",
         borderRadius: "1px",
-        border: "1px solid #324e9c",
+        border: `1px solid ${token.colorBorder}`,
         width: "fit-content",
         margin: "0 auto",
         boxSizing: "border-box"
       }}
     >
-      <h3 style={{ color: "#FFFFFF", margin: "0 0 8px 0", fontSize: "16px", fontWeight: 500 }}>
+      <h3
+        style={{ color: token.colorText, margin: "0 0 8px 0", fontSize: "16px", fontWeight: 500 }}
+      >
         Ajuste de Calibración
       </h3>
 
-      <p style={{ fontSize: "12px", color: "#676D7D", marginBottom: "24px", lineHeight: "1.4" }}>
+      <p
+        style={{
+          fontSize: "12px",
+          color: token.colorTextPlaceholder,
+          marginBottom: "24px",
+          lineHeight: "1.4"
+        }}
+      >
         Coloque su tarjeta física sobre la pantalla y mueva las barras hasta que la silueta
         coincida.
       </p>
@@ -78,7 +89,7 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#0F1422",
+            backgroundColor: token.colorBgLayout,
             borderRadius: "4px",
             boxSizing: "border-box",
             width: `${maxCardWidth + 50}px`,
@@ -91,7 +102,7 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
             style={{
               width: `${visualWidth}px`,
               height: `${visualHeight}px`,
-              border: "1px dashed #7367F0",
+              border: `1px dashed ${token.colorPrimary}`,
               borderRadius: "4px",
               position: "relative",
               flexShrink: 0,
@@ -106,7 +117,7 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
                 right: "0",
                 textAlign: "center",
                 fontSize: "11px",
-                color: "#7367F0",
+                color: token.colorPrimary,
                 fontWeight: "500",
                 whiteSpace: "nowrap",
                 pointerEvents: "none"
@@ -122,7 +133,7 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
                 top: "50%",
                 transform: "translateY(-50%)",
                 fontSize: "11px",
-                color: "#7367F0",
+                color: token.colorPrimary,
                 fontWeight: "500",
                 whiteSpace: "nowrap",
                 pointerEvents: "none",
@@ -150,7 +161,8 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
         >
           <ZoomInOutlined
             style={{
-              color: heightMultiplier >= 1.5 ? "#3d4251" : "#676D7D",
+              color:
+                heightMultiplier >= 1.5 ? token.colorBorderSecondary : token.colorTextDescription,
               fontSize: "16px",
               cursor: heightMultiplier >= 1.5 ? "not-allowed" : "pointer"
             }}
@@ -175,7 +187,8 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
           />
           <ZoomOutOutlined
             style={{
-              color: heightMultiplier <= 0.5 ? "#3d4251" : "#676D7D",
+              color:
+                heightMultiplier <= 0.5 ? token.colorBorderSecondary : token.colorTextDescription,
               fontSize: "16px",
               cursor: heightMultiplier <= 0.5 ? "not-allowed" : "pointer"
             }}
@@ -203,7 +216,8 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
         >
           <ZoomOutOutlined
             style={{
-              color: widthMultiplier <= 0.5 ? "#3d4251" : "#676D7D",
+              color:
+                widthMultiplier <= 0.5 ? token.colorBorderSecondary : token.colorTextDescription,
               fontSize: "16px",
               cursor: widthMultiplier <= 0.5 ? "not-allowed" : "pointer"
             }}
@@ -227,7 +241,8 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
           />
           <ZoomInOutlined
             style={{
-              color: widthMultiplier >= 1.5 ? "#3d4251" : "#676D7D",
+              color:
+                widthMultiplier >= 1.5 ? token.colorBorderSecondary : token.colorTextDescription,
               fontSize: "16px",
               cursor: widthMultiplier >= 1.5 ? "not-allowed" : "pointer"
             }}
@@ -252,9 +267,7 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
           onClick={onClose}
           style={{
             flex: 1,
-            backgroundColor: "#283046",
-            color: "#B4B7BD",
-            border: "1px solid #404656",
+            border: "none",
             borderRadius: "4px",
             height: "36px"
           }}
@@ -266,8 +279,6 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
           onClick={handleConfirm}
           style={{
             flex: 1,
-            backgroundColor: "#7367F0",
-            color: "#FFFFFF",
             border: "none",
             borderRadius: "4px",
             fontWeight: 500,
