@@ -33,6 +33,12 @@ interface ILocale {
       zoomIn: string;
       turn: string;
       calibrate: string;
+      calibrationDialog: {
+        title: string;
+        instruction: string;
+        width: string;
+        height: string;
+      };
       previous: string;
       generic: string;
       next: string;
@@ -57,6 +63,7 @@ interface ILocale {
     createProject: string;
     save: string;
     cancel: string;
+    confirm: string;
     fieldEditor: string;
     componentEditor: string;
     name: string;

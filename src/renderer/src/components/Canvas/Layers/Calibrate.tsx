@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Slider, Button, theme } from "antd";
 import { ZoomInOutlined, ZoomOutOutlined } from "@ant-design/icons";
 import { useLocalConfigStore } from "../../../store/useLocalConfigStore";
+import { useI18n } from "../../../hooks/useI18n";
 
 interface CalibrateProps {
   onClose: () => void;
@@ -23,14 +24,14 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
 
   const CARD_WIDTH_CM = 8.56;
   const CARD_HEIGHT_CM = 5.398;
-  const CM_TO_PX = 96 / 2.54;
+  const SCALE_FACTOR = 96 / 2.54;
   const MAX_SCALE = 1.5;
 
-  const visualWidth = CARD_WIDTH_CM * CM_TO_PX * window.devicePixelRatio * widthMultiplier;
-  const visualHeight = CARD_HEIGHT_CM * CM_TO_PX * window.devicePixelRatio * heightMultiplier;
+  const visualWidth = CARD_WIDTH_CM * SCALE_FACTOR * window.devicePixelRatio * widthMultiplier;
+  const visualHeight = CARD_HEIGHT_CM * SCALE_FACTOR * window.devicePixelRatio * heightMultiplier;
 
-  const maxCardWidth = CARD_WIDTH_CM * CM_TO_PX * window.devicePixelRatio * MAX_SCALE;
-  const maxCardHeight = CARD_HEIGHT_CM * CM_TO_PX * window.devicePixelRatio * MAX_SCALE;
+  const maxCardWidth = CARD_WIDTH_CM * SCALE_FACTOR * window.devicePixelRatio * MAX_SCALE;
+  const maxCardHeight = CARD_HEIGHT_CM * SCALE_FACTOR * window.devicePixelRatio * MAX_SCALE;
 
   const handleConfirm = async (): Promise<void> => {
     await setCanvasLocalScaleToReal({
@@ -39,6 +40,8 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
     });
     onClose();
   };
+
+  const { t } = useI18n();
 
   return (
     <div
@@ -57,7 +60,7 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
       <h3
         style={{ color: token.colorText, margin: "0 0 8px 0", fontSize: "16px", fontWeight: 500 }}
       >
-        Ajuste de Calibración
+        {t("centralPanel.settings.calibrationDialog.title")}
       </h3>
 
       <p
@@ -68,8 +71,7 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
           lineHeight: "1.4"
         }}
       >
-        Coloque su tarjeta física sobre la pantalla y mueva las barras hasta que la silueta
-        coincida.
+        {t("centralPanel.settings.calibrationDialog.instruction")}
       </p>
 
       <div
@@ -181,7 +183,8 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
             onChange={(value) => setHeightMultiplier(value as number)}
             style={{ flex: 1, margin: "12px 0" }}
             tooltip={{
-              formatter: (v) => `Alto: x${v?.toFixed(2)}`,
+              formatter: (v) =>
+                `${t("centralPanel.settings.calibrationDialog.height")}: x${v?.toFixed(2)}`,
               open: showHeightTooltip
             }}
           />
@@ -235,7 +238,8 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
             onChange={(value) => setWidthMultiplier(value as number)}
             style={{ flex: 1, margin: 0 }}
             tooltip={{
-              formatter: (v) => `Ancho: x${v?.toFixed(2)}`,
+              formatter: (v) =>
+                `${t("centralPanel.settings.calibrationDialog.width")}: x${v?.toFixed(2)}`,
               open: showWidthTooltip
             }}
           />
@@ -267,12 +271,12 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
           onClick={onClose}
           style={{
             flex: 1,
-            border: "none",
+            border: `2px solid ${token.colorBorderSecondary}`,
             borderRadius: "4px",
             height: "36px"
           }}
         >
-          Cancelar
+          {t("dialogs.cancel")}
         </Button>
         <Button
           type="primary"
@@ -285,7 +289,7 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
             height: "36px"
           }}
         >
-          Confirmar
+          {t("dialogs.confirm")}
         </Button>
       </div>
     </div>
