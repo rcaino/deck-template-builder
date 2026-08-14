@@ -53,13 +53,13 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
 
   const hasBorder = style.border != undefined;
 
-  // Extraemos las propiedades de manera segura tipándolas como un registro de datos desconocido
   const borderProperties = style.border as unknown as Record<string, unknown>;
 
-  // Evaluamos el borderWidth numérico de forma segura antes de multiplicarlo por la escala
+  const borderWidthObj = borderProperties?.borderWidth as Record<string, unknown> | undefined;
+
   const computedBorderWidth =
-    typeof borderProperties?.borderWidth === "number"
-      ? borderProperties.borderWidth * scale.x
+    typeof borderWidthObj?.y === "number" && typeof borderWidthObj?.x === "number"
+      ? `${borderWidthObj?.y * scale.y}px ${borderWidthObj?.x * scale.x}px`
       : undefined;
 
   return (
