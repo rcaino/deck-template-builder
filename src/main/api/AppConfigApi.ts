@@ -56,7 +56,7 @@ class AppConfigApi {
           };
         } catch (error) {
           console.error("Error al leer la configuración desde fonts.ts:", error);
-          return { canvasLocalScaleToReal: { x: 1.0, y: 1.0 } }; // Fallback seguro
+          return { canvasLocalScaleToReal: { x: 1.0, y: 1.0 } };
         }
       }
     );
