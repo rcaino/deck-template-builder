@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { useTemplateStore } from "../../store/useTemplateStore";
 import { DataType, ILevelLayer } from "@common/types";
 import RootLayer from "./Layers/RootLayer";
@@ -44,19 +44,16 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
   const layers = useTemplateStore((state) => state.layers);
   const rootFromStore = layers["root"];
 
-  // 1. MODIFICACIÓN: Base común del factor de conversión a píxeles reales
   const baseAdjustFactor =
     ((96 / 2.54) * window.devicePixelRatio) / (canvasPPC ?? (canvasPPI ? canvasPPI / 2.54 : 100));
 
-  // 2. MODIFICACIÓN: Separación del cálculo de escalas finales en dos ejes (X e Y)
-  // POR QUÉ: Multiplicamos el factor base y el zoomLevel por las coordenadas independientes
-  // de 'canvasLocalScaleToReal.x' y 'canvasLocalScaleToReal.y' provenientes del Zustand Store.
-  const finalScaleX = zoomLevel * baseAdjustFactor * (canvasLocalScaleToReal?.x || 1.0);
-  const finalScaleY = zoomLevel * baseAdjustFactor * (canvasLocalScaleToReal?.y || 1.0);
-
-  // 3. MODIFICACIÓN: Empaquetar las escalas en un objeto unificado
-  // POR QUÉ: Permite enviar ambas dimensiones juntas a través de las propiedades de las capas.
-  const finalScaleObject = { x: finalScaleX, y: finalScaleY };
+  const finalScaleObject = useMemo<{ x: number; y: number }>(
+    () => ({
+      x: zoomLevel * baseAdjustFactor * (canvasLocalScaleToReal?.x ?? 1.0),
+      y: zoomLevel * baseAdjustFactor * (canvasLocalScaleToReal?.y ?? 1.0)
+    }),
+    [zoomLevel, baseAdjustFactor, canvasLocalScaleToReal?.x, canvasLocalScaleToReal?.y]
+  );
 
   const layerRef = useRef<HTMLDivElement>(null);
 
@@ -67,7 +64,6 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
       .map((layer) => {
         if (layer.type === "area") {
           return (
-            /* 4. MODIFICACIÓN: Cambiado 'scale={finalScale}' por 'scale={finalScaleObject}' */
             <AreaLayer
               ref={layerRef}
               key={layer.id}
@@ -82,7 +78,6 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
 
         if (layer.type === "data") {
           return (
-            /* 5. MODIFICACIÓN: Cambiado 'scale={finalScale}' por 'scale={finalScaleObject}' */
             <FieldLayer
               ref={layerRef}
               key={layer.id}
@@ -99,7 +94,6 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
 
   return (
     <div style={viewportStyle} ref={viewportRef}>
-      {/* 6. MODIFICACIÓN: Cambiado 'scale={finalScale}' por 'scale={finalScaleObject}' */}
       <RootLayer
         layerProps={{
           style: rootFromStore?.style,

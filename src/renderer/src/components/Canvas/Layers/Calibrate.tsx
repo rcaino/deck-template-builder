@@ -2,182 +2,187 @@ import React, { useState } from "react";
 import { Slider, Button, theme } from "antd";
 import { ZoomInOutlined, ZoomOutOutlined } from "@ant-design/icons";
 import { useLocalConfigStore } from "../../../store/useLocalConfigStore";
+import { usePreferencesStore } from "../../../store/usePreferencesStore"; // Importas tu store de unidades
 import { useI18n } from "../../../hooks/useI18n";
 
 interface CalibrateProps {
   onClose: () => void;
 }
 
+const MAX_SCALE = 1.5;
+const MIN_SCALE = 0.5;
+
 export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
   const { token } = theme.useToken();
+  const { t } = useI18n();
+
+  const unit = usePreferencesStore((state) => state.unit);
+  const isInch = unit === "in";
+  // Size of a standard debit card
+  const CARD_WIDTH = isInch ? 3.37 : 8.56;
+  const CARD_HEIGHT = isInch ? 2.125 : 5.398;
+
+  const SCALE_FACTOR = isInch ? 96 : 96 / 2.54;
+  const unitLabel = isInch ? "in" : "cm";
 
   const canvasLocalScaleToReal = useLocalConfigStore((state) => state.canvasLocalScaleToReal);
   const setCanvasLocalScaleToReal = useLocalConfigStore((state) => state.setCanvasLocalScaleToReal);
-
   const [widthMultiplier, setWidthMultiplier] = useState<number>(canvasLocalScaleToReal?.x || 1.0);
   const [heightMultiplier, setHeightMultiplier] = useState<number>(
     canvasLocalScaleToReal?.y || 1.0
   );
-
   const [showWidthTooltip, setShowWidthTooltip] = useState<boolean>(false);
   const [showHeightTooltip, setShowHeightTooltip] = useState<boolean>(false);
 
-  const CARD_WIDTH_CM = 8.56;
-  const CARD_HEIGHT_CM = 5.398;
-  const SCALE_FACTOR = 96 / 2.54;
-  const MAX_SCALE = 1.5;
+  const visualWidth = CARD_WIDTH * SCALE_FACTOR * window.devicePixelRatio * widthMultiplier;
+  const visualHeight = CARD_HEIGHT * SCALE_FACTOR * window.devicePixelRatio * heightMultiplier;
+  const maxCardWidth = CARD_WIDTH * SCALE_FACTOR * window.devicePixelRatio * MAX_SCALE;
+  const maxCardHeight = CARD_HEIGHT * SCALE_FACTOR * window.devicePixelRatio * MAX_SCALE;
 
-  const visualWidth = CARD_WIDTH_CM * SCALE_FACTOR * window.devicePixelRatio * widthMultiplier;
-  const visualHeight = CARD_HEIGHT_CM * SCALE_FACTOR * window.devicePixelRatio * heightMultiplier;
+  const mainContainerStyle: React.CSSProperties = {
+    textAlign: "center",
+    padding: "20px",
+    width: "fit-content",
+    margin: "0 auto",
+    boxSizing: "border-box",
+    backgroundColor: token.colorBgLayout,
+    color: token.colorText,
+    border: `1px solid ${token.colorBorder}`
+  };
 
-  const maxCardWidth = CARD_WIDTH_CM * SCALE_FACTOR * window.devicePixelRatio * MAX_SCALE;
-  const maxCardHeight = CARD_HEIGHT_CM * SCALE_FACTOR * window.devicePixelRatio * MAX_SCALE;
+  const titleStyle: React.CSSProperties = {
+    marginBottom: "8px",
+    fontSize: "16px",
+    fontWeight: 500,
+    color: token.colorText
+  };
+
+  const descriptionStyle: React.CSSProperties = {
+    marginBottom: "24px",
+    fontSize: "12px",
+    color: token.colorTextPlaceholder
+  };
+
+  const gridContainerStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: "1fr 40px",
+    gridTemplateRows: "auto 40px",
+    gap: "16px",
+    margin: "0 auto 24px auto"
+  };
+
+  const cardWrapperStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "4px",
+    margin: "0 auto",
+    position: "relative",
+    backgroundColor: token.colorBgLayout
+  };
+
+  const cardDashedStyle: React.CSSProperties = {
+    borderRadius: "4px",
+    position: "relative",
+    flexShrink: 0,
+    transition: "width 0.1s ease, height 0.1s ease",
+    border: `1px dashed ${token.colorPrimary}`
+  };
+
+  const baseLabelStyle: React.CSSProperties = {
+    position: "absolute",
+    right: "0%",
+    left: "0%",
+    margin: "10px 0",
+    fontSize: "11px",
+    color: token.colorPrimary,
+    fontWeight: 500,
+    whiteSpace: "nowrap",
+    pointerEvents: "none"
+  };
+
+  const verticalStyle = {
+    right: "8px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    writingMode: "vertical-rl" as const
+  };
+
+  const verticalSliderStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    gridArea: "1 / 2 / 2 / 3",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    padding: "12px 0",
+    height: "100%"
+  };
+
+  const horizontalSliderStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    gridArea: "2 / 1 / 3 / 2",
+    padding: "0 12px",
+    width: `${maxCardWidth + 50}px`
+  };
 
   const handleConfirm = async (): Promise<void> => {
-    await setCanvasLocalScaleToReal({
-      x: widthMultiplier,
-      y: heightMultiplier
-    });
+    await setCanvasLocalScaleToReal({ x: widthMultiplier, y: heightMultiplier });
     onClose();
   };
 
-  const { t } = useI18n();
+  const getIconStyle = (isDisabled: boolean): React.CSSProperties => ({
+    color: isDisabled ? token.colorBorderSecondary : token.colorTextDescription,
+    fontSize: "16px",
+    cursor: isDisabled ? "not-allowed" : "pointer"
+  });
 
   return (
-    <div
-      style={{
-        textAlign: "center",
-        backgroundColor: token.colorBgLayout,
-        color: token.colorText,
-        padding: "20px",
-        borderRadius: "1px",
-        border: `1px solid ${token.colorBorder}`,
-        width: "fit-content",
-        margin: "0 auto",
-        boxSizing: "border-box"
-      }}
-    >
-      <h3
-        style={{ color: token.colorText, margin: "0 0 8px 0", fontSize: "16px", fontWeight: 500 }}
-      >
-        {t("centralPanel.settings.calibrationDialog.title")}
-      </h3>
+    <div style={mainContainerStyle}>
+      <h3 style={titleStyle}>{t("centralPanel.settings.calibrationDialog.title")}</h3>
 
-      <p
-        style={{
-          fontSize: "12px",
-          color: token.colorTextPlaceholder,
-          marginBottom: "24px",
-          lineHeight: "1.4"
-        }}
-      >
-        {t("centralPanel.settings.calibrationDialog.instruction")}
-      </p>
+      <p style={descriptionStyle}>{t("centralPanel.settings.calibrationDialog.instruction")}</p>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 40px",
-          gridTemplateRows: "auto 40px",
-          gap: "16px",
-          width: `${maxCardWidth + 50 + 40 + 16}px`,
-          margin: "0 auto 24px auto",
-          boxSizing: "border-box"
-        }}
-      >
+      <div style={{ ...gridContainerStyle, width: `${maxCardWidth + 50 + 40 + 16}px` }}>
         <div
           style={{
-            gridArea: "1 / 1 / 2 / 2",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: token.colorBgLayout,
-            borderRadius: "4px",
-            boxSizing: "border-box",
+            ...cardWrapperStyle,
             width: `${maxCardWidth + 50}px`,
-            height: `${maxCardHeight + 50}px`,
-            margin: "0 auto",
-            position: "relative"
+            height: `${maxCardHeight + 50}px`
           }}
         >
           <div
-            style={{
-              width: `${visualWidth}px`,
-              height: `${visualHeight}px`,
-              border: `1px dashed ${token.colorPrimary}`,
-              borderRadius: "4px",
-              position: "relative",
-              flexShrink: 0,
-              transition: "width 0.1s ease, height 0.1s ease"
-            }}
+            style={{ ...cardDashedStyle, width: `${visualWidth}px`, height: `${visualHeight}px` }}
           >
-            <span
-              style={{
-                position: "absolute",
-                bottom: "8px",
-                left: "0",
-                right: "0",
-                textAlign: "center",
-                fontSize: "11px",
-                color: token.colorPrimary,
-                fontWeight: "500",
-                whiteSpace: "nowrap",
-                pointerEvents: "none"
-              }}
-            >
-              {CARD_WIDTH_CM} cm
+            <span style={{ ...baseLabelStyle, left: 0, right: 0 }}>
+              {CARD_WIDTH} {unitLabel}
             </span>
 
-            <span
-              style={{
-                position: "absolute",
-                right: "8px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                fontSize: "11px",
-                color: token.colorPrimary,
-                fontWeight: "500",
-                whiteSpace: "nowrap",
-                pointerEvents: "none",
-                writingMode: "vertical-rl"
-              }}
-            >
-              {CARD_HEIGHT_CM} cm
+            <span style={{ ...baseLabelStyle, ...verticalStyle }}>
+              {CARD_HEIGHT} {unitLabel}
             </span>
           </div>
         </div>
 
         <div
-          style={{
-            gridArea: "1 / 2 / 2 / 3",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "12px 0",
-            boxSizing: "border-box",
-            height: "100%"
-          }}
+          style={{ ...verticalSliderStyle }}
           onMouseEnter={() => setShowHeightTooltip(true)}
           onMouseLeave={() => setShowHeightTooltip(false)}
         >
           <ZoomInOutlined
-            style={{
-              color:
-                heightMultiplier >= 1.5 ? token.colorBorderSecondary : token.colorTextDescription,
-              fontSize: "16px",
-              cursor: heightMultiplier >= 1.5 ? "not-allowed" : "pointer"
-            }}
+            style={getIconStyle(heightMultiplier >= MAX_SCALE)}
             onClick={() => {
-              if (heightMultiplier < 1.5) {
+              if (heightMultiplier < MAX_SCALE) {
                 setHeightMultiplier(Number((heightMultiplier + 0.01).toFixed(2)));
               }
             }}
           />
           <Slider
             vertical
-            min={0.5}
-            max={1.5}
+            min={MIN_SCALE}
+            max={MAX_SCALE}
             step={0.01}
             value={heightMultiplier}
             onChange={(value) => setHeightMultiplier(value as number)}
@@ -189,14 +194,9 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
             }}
           />
           <ZoomOutOutlined
-            style={{
-              color:
-                heightMultiplier <= 0.5 ? token.colorBorderSecondary : token.colorTextDescription,
-              fontSize: "16px",
-              cursor: heightMultiplier <= 0.5 ? "not-allowed" : "pointer"
-            }}
+            style={getIconStyle(heightMultiplier <= MIN_SCALE)}
             onClick={() => {
-              if (heightMultiplier > 0.5) {
+              if (heightMultiplier > MIN_SCALE) {
                 setHeightMultiplier(Number((heightMultiplier - 0.01).toFixed(2)));
               }
             }}
@@ -204,35 +204,21 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
         </div>
 
         <div
-          style={{
-            gridArea: "2 / 1 / 3 / 2",
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            padding: "0 12px",
-            width: `${maxCardWidth + 50}px`,
-            margin: "0 auto",
-            boxSizing: "border-box"
-          }}
+          style={{ ...horizontalSliderStyle }}
           onMouseEnter={() => setShowWidthTooltip(true)}
           onMouseLeave={() => setShowWidthTooltip(false)}
         >
           <ZoomOutOutlined
-            style={{
-              color:
-                widthMultiplier <= 0.5 ? token.colorBorderSecondary : token.colorTextDescription,
-              fontSize: "16px",
-              cursor: widthMultiplier <= 0.5 ? "not-allowed" : "pointer"
-            }}
+            style={getIconStyle(widthMultiplier <= MIN_SCALE)}
             onClick={() => {
-              if (widthMultiplier > 0.5) {
+              if (widthMultiplier > MIN_SCALE) {
                 setWidthMultiplier(Number((widthMultiplier - 0.01).toFixed(2)));
               }
             }}
           />
           <Slider
-            min={0.5}
-            max={1.5}
+            min={MIN_SCALE}
+            max={MAX_SCALE}
             step={0.01}
             value={widthMultiplier}
             onChange={(value) => setWidthMultiplier(value as number)}
@@ -244,14 +230,9 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
             }}
           />
           <ZoomInOutlined
-            style={{
-              color:
-                widthMultiplier >= 1.5 ? token.colorBorderSecondary : token.colorTextDescription,
-              fontSize: "16px",
-              cursor: widthMultiplier >= 1.5 ? "not-allowed" : "pointer"
-            }}
+            style={getIconStyle(widthMultiplier >= MAX_SCALE)}
             onClick={() => {
-              if (widthMultiplier < 1.5) {
+              if (widthMultiplier < MAX_SCALE) {
                 setWidthMultiplier(Number((widthMultiplier + 0.01).toFixed(2)));
               }
             }}
@@ -259,36 +240,14 @@ export const Calibrate: React.FC<CalibrateProps> = ({ onClose }) => {
         </div>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "12px",
-          width: `${maxCardWidth + 50 + 40 + 16}px`,
-          margin: "0 auto"
-        }}
-      >
+      <div style={{ width: `${maxCardWidth + 50 + 40 + 16}px`, display: "flex", gap: "12px" }}>
         <Button
           onClick={onClose}
-          style={{
-            flex: 1,
-            border: `2px solid ${token.colorBorderSecondary}`,
-            borderRadius: "4px",
-            height: "36px"
-          }}
+          style={{ flex: 1, border: `2px solid ${token.colorBorderSecondary}` }}
         >
           {t("dialogs.cancel")}
         </Button>
-        <Button
-          type="primary"
-          onClick={handleConfirm}
-          style={{
-            flex: 1,
-            border: "none",
-            borderRadius: "4px",
-            fontWeight: 500,
-            height: "36px"
-          }}
-        >
+        <Button type="primary" onClick={handleConfirm} style={{ flex: 1 }}>
           {t("dialogs.confirm")}
         </Button>
       </div>

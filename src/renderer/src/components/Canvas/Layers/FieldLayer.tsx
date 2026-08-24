@@ -24,7 +24,6 @@ const FieldLayer: React.FC<FieldLayerProps> = (props) => {
 
   const rawValue = cardData ? cardData[mappingKey] : undefined;
 
-  // 1. CORRECCIÓN: Armamos el objeto libremente y aplicamos el casteo al final para evitar herencias rotas de CSS
   const containerStyles = {
     position: "absolute",
     left: position.x * scale.x,
@@ -35,7 +34,6 @@ const FieldLayer: React.FC<FieldLayerProps> = (props) => {
     ...style
   } as React.CSSProperties;
 
-  // 2. CORRECCIÓN: Aseguramos que fontSize sea numérico antes de multiplicarlo por la escala
   const scaledFontSize = typeof fontSize === "number" ? fontSize * scale.y : undefined;
 
   const renderContent: () => JSX.Element = () => {
