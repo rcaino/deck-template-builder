@@ -53,14 +53,9 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
 
   const hasBorder = style.border != undefined;
 
-  const borderProperties = style.border as unknown as Record<string, unknown>;
-
-  const borderWidthObj = borderProperties?.borderWidth as Record<string, unknown> | undefined;
-
-  const computedBorderWidth =
-    typeof borderWidthObj?.y === "number" && typeof borderWidthObj?.x === "number"
-      ? `${borderWidthObj?.y * scale.y}px ${borderWidthObj?.x * scale.x}px`
-      : undefined;
+  const computedBorderWidth = style.border?.borderWidth
+    ? `${style.border.borderWidth * scale.y}px ${style.border.borderWidth * scale.x}px`
+    : undefined;
 
   return (
     <div style={canvasStyles} className="canvas-container">
@@ -86,10 +81,10 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
             style={
               {
                 ...backgroundImgStyle,
-                ...borderProperties,
+                ...style.border,
                 borderWidth: computedBorderWidth,
-                borderImage: borderProperties?.borderImage
-                  ? `url("${borderProperties.borderImage}")`
+                borderImage: style.border?.borderImage
+                  ? `url("${style.border.borderImage}")`
                   : undefined
               } as React.CSSProperties
             }

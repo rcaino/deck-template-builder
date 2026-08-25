@@ -13,6 +13,7 @@ export interface IComponentStyle {
   backgroundColor?: React.CSSProperties["backgroundColor"];
   border?:
     | {
+        borderImage: never;
         borderWidth: number;
         borderStyle: React.CSSProperties["borderStyle"];
         borderColor: React.CSSProperties["borderColor"];
