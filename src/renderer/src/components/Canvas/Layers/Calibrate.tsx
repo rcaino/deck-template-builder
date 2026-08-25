@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Slider, Button, theme } from "antd";
 import { ZoomInOutlined, ZoomOutOutlined } from "@ant-design/icons";
 import { useLocalConfigStore } from "../../../store/useLocalConfigStore";
-import { usePreferencesStore } from "../../../store/usePreferencesStore"; // Importas tu store de unidades
+import { usePreferencesStore } from "../../../store/usePreferencesStore";
 import { useI18n } from "../../../hooks/useI18n";
 
 interface CalibrateProps {
