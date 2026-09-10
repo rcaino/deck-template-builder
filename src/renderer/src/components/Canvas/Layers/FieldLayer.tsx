@@ -16,33 +16,41 @@ const FieldLayer: React.FC<FieldLayerProps> = (props) => {
     fontSize,
     fontFamily,
     mappingKey,
-    dataType, // Este es tu "text" | "numeric" | "image" | "sprite"
+    dataType,
     style,
-    cardData
+    cardData,
+    scale
   } = props;
 
   const rawValue = cardData ? cardData[mappingKey] : undefined;
 
-  const containerStyles: React.CSSProperties = {
+  const containerStyles = {
     position: "absolute",
-    left: position.x,
-    top: position.y,
-    width: size.width,
-    height: size.height,
+    left: position.x * scale.x,
+    top: position.y * scale.y,
+    width: size.width * scale.x,
+    height: size.height * scale.y,
     zIndex: level + 1,
     ...style
-  };
+  } as React.CSSProperties;
+
+  const scaledFontSize = typeof fontSize === "number" ? fontSize * scale.y : undefined;
+
   const renderContent: () => JSX.Element = () => {
     if (rawValue === undefined) {
       return (
-        <span style={{ color: fontColor || "#888", fontSize, fontFamily }}>[{props.name}]</span>
+        <span style={{ color: fontColor || "#888", fontSize: scaledFontSize, fontFamily }}>
+          [{props.name}]
+        </span>
       );
     }
 
     switch (dataType) {
       case "numeric":
         return (
-          <span style={{ color: fontColor, fontSize, fontFamily, fontWeight: "bold" }}>
+          <span
+            style={{ color: fontColor, fontSize: scaledFontSize, fontFamily, fontWeight: "bold" }}
+          >
             {Number(rawValue)}
           </span>
         );
@@ -59,13 +67,14 @@ const FieldLayer: React.FC<FieldLayerProps> = (props) => {
       case "sprite":
         try {
           const sprite = typeof rawValue === "string" ? JSON.parse(rawValue) : rawValue;
+
           return (
             <div
               style={{
                 width: "100%",
                 height: "100%",
                 backgroundImage: `url(${sprite.sheet})`,
-                backgroundPosition: `-${sprite.x}px -${sprite.y}px`,
+                backgroundPosition: `-${sprite.x * scale.x}px -${sprite.y * scale.y}px`,
                 backgroundSize: "auto",
                 backgroundRepeat: "no-repeat"
               }}
@@ -79,7 +88,14 @@ const FieldLayer: React.FC<FieldLayerProps> = (props) => {
       case "text":
       default:
         return (
-          <span style={{ color: fontColor, fontSize, fontFamily, wordBreak: "break-word" }}>
+          <span
+            style={{
+              color: fontColor,
+              fontSize: scaledFontSize,
+              fontFamily,
+              wordBreak: "break-word"
+            }}
+          >
             {String(rawValue)}
           </span>
         );

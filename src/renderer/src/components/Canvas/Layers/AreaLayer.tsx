@@ -35,7 +35,7 @@ const getPath: (path: AreaLayerProps["path"]) => React.CSSProperties["clipPath"]
 };
 
 const AreaLayer: React.FC<AreaLayerProps> = (props) => {
-  const styles: React.CSSProperties = {
+  const styles = {
     position: "absolute",
     left: props.position.x,
     top: props.position.y,
@@ -45,9 +45,9 @@ const AreaLayer: React.FC<AreaLayerProps> = (props) => {
     backgroundColor: props.backgroundColor,
     backgroundImage: props.backgroundImage,
     clipPath: getPath(props.path),
-    border: props.border,
+    ...(props.border as unknown as Record<string, unknown>),
     ...props.style
-  };
+  } as React.CSSProperties;
 
   return (
     <div style={styles} data-layer-id={props.id}>
@@ -55,4 +55,5 @@ const AreaLayer: React.FC<AreaLayerProps> = (props) => {
     </div>
   );
 };
+
 export default AreaLayer;

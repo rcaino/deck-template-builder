@@ -31,6 +31,13 @@ export const localeEN: ILocale = {
       zoomIn: "Zoom In",
       turn: "Turn",
       calibrate: "Calibrate",
+      calibrationDialog: {
+        title: "Calibration",
+        instruction:
+          "Place your physical bank card on the screen and adjust the sliders until the size matches.",
+        width: "Width",
+        height: "Height"
+      },
       previous: "Previous",
       generic: "Generic Card",
       next: "Next"
@@ -55,6 +62,7 @@ export const localeEN: ILocale = {
     createProject: "Create Project",
     save: "Save",
     cancel: "Cancel",
+    confirm: "Confirm",
     fieldEditor: "Field Editor",
     componentEditor: "Component Editor",
     name: "Name",

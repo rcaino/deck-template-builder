@@ -1,9 +1,12 @@
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { useTemplateStore } from "../../store/useTemplateStore";
 import { DataType, ILevelLayer } from "@common/types";
 import RootLayer from "./Layers/RootLayer";
 import AreaLayer from "./Layers/AreaLayer";
 import FieldLayer from "./Layers/FieldLayer";
+import { Modal, ConfigProvider } from "antd";
+import { Calibrate } from "./Layers/Calibrate";
+import { useLocalConfigStore } from "../../store/useLocalConfigStore";
 
 interface CanvasViewportProps {
   zoomLevel: number;
@@ -20,7 +23,8 @@ const viewportStyle: React.CSSProperties = {
   backgroundColor: "var(--ant-color-bg-layout)",
   width: "100%",
   height: "100%",
-  overflow: "auto"
+  overflow: "auto",
+  position: "relative"
 };
 
 const CanvasViewport: React.FC<CanvasViewportProps> = ({
@@ -33,13 +37,26 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
   viewportRef,
   cardData
 }) => {
+  const canvasLocalScaleToReal = useLocalConfigStore((state) => state.canvasLocalScaleToReal);
+  const isCalibrateModalOpen = useLocalConfigStore((state) => state.isCalibrateModalOpen);
+  const setIsCalibrateModalOpen = useLocalConfigStore((state) => state.setIsCalibrateModalOpen);
+
   const layers = useTemplateStore((state) => state.layers);
   const rootFromStore = layers["root"];
-  const viewAdjustFactor =
-    (0.95 * 95 * window.devicePixelRatio) / (canvasPPC ? canvasPPC * 2.54 : (canvasPPI ?? 254));
 
-  const finalScale = zoomLevel * viewAdjustFactor;
+  const baseAdjustFactor =
+    ((96 / 2.54) * window.devicePixelRatio) / (canvasPPC ?? (canvasPPI ? canvasPPI / 2.54 : 100));
+
+  const finalScaleObject = useMemo<{ x: number; y: number }>(
+    () => ({
+      x: zoomLevel * baseAdjustFactor * (canvasLocalScaleToReal?.x ?? 1.0),
+      y: zoomLevel * baseAdjustFactor * (canvasLocalScaleToReal?.y ?? 1.0)
+    }),
+    [zoomLevel, baseAdjustFactor, canvasLocalScaleToReal?.x, canvasLocalScaleToReal?.y]
+  );
+
   const layerRef = useRef<HTMLDivElement>(null);
+
   const renderLayerChildren = (parentId: string): React.ReactNode[] => {
     return Object.values(layers)
       .filter((layer): layer is ILevelLayer => layer.type !== "root" && layer.parentId === parentId)
@@ -47,7 +64,13 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
       .map((layer) => {
         if (layer.type === "area") {
           return (
-            <AreaLayer ref={layerRef} key={layer.id} {...layer} scale={finalScale} isRoot={false}>
+            <AreaLayer
+              ref={layerRef}
+              key={layer.id}
+              {...layer}
+              scale={finalScaleObject}
+              isRoot={false}
+            >
               {renderLayerChildren(layer.id)}
             </AreaLayer>
           );
@@ -59,7 +82,7 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
               ref={layerRef}
               key={layer.id}
               {...layer}
-              scale={finalScale}
+              scale={finalScaleObject}
               cardData={cardData}
             />
           );
@@ -81,11 +104,36 @@ const CanvasViewport: React.FC<CanvasViewportProps> = ({
           type: "root",
           ppc: canvasPPC ?? (canvasPPI ?? 254) / 2.54
         }}
-        scale={finalScale}
+        scale={finalScaleObject}
         ref={canvasRef}
       >
         {renderLayerChildren("root")}
       </RootLayer>
+
+      <ConfigProvider
+        theme={{
+          components: {
+            Modal: {
+              contentBg: "transparent",
+              paddingMD: 0,
+              paddingLG: 0,
+              boxShadow: "none"
+            }
+          }
+        }}
+      >
+        <Modal
+          open={isCalibrateModalOpen}
+          onCancel={() => setIsCalibrateModalOpen(false)}
+          footer={null}
+          closable={false}
+          centered
+          destroyOnClose
+          width={825}
+        >
+          <Calibrate onClose={() => setIsCalibrateModalOpen(false)} />
+        </Modal>
+      </ConfigProvider>
     </div>
   );
 };

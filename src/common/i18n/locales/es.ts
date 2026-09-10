@@ -30,6 +30,13 @@ export const localeES: ILocale = {
       zoomIn: "Acercar",
       turn: "Girar",
       calibrate: "Calibrar",
+      calibrationDialog: {
+        title: "Calibración",
+        instruction:
+          "Coloca tu tarjeta bancaria física en la pantalla y ajusta los controles deslizantes hasta que el tamaño coincida.",
+        width: "Ancho",
+        height: "Alto"
+      },
       previous: "Previo",
       generic: "Carta Base",
       next: "Siguiente"
@@ -54,6 +61,7 @@ export const localeES: ILocale = {
     createProject: "Crear Proyecto",
     save: "Guardar",
     cancel: "Cancelar",
+    confirm: "Confirmar",
     fieldEditor: "Editor de Campos",
     componentEditor: "Editor de Componentes",
     name: "Nombre",
