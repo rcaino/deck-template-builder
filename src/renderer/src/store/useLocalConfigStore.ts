@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-interface ScaleObject {
+export interface ScaleObject {
   x: number;
   y: number;
 }
@@ -13,36 +13,48 @@ interface LocalConfigState {
   loadLocalConfig: () => Promise<void>;
 }
 
-export const useLocalConfigStore = create<LocalConfigState>((set) => ({
-  canvasLocalScaleToReal: { x: 1.0, y: 1.0 },
+const DEFAULT_SCALE: Readonly<ScaleObject> = { x: 1.0, y: 1.0 };
+
+export const useLocalConfigStore = create<LocalConfigState>((set, get) => ({
+  canvasLocalScaleToReal: DEFAULT_SCALE,
   isCalibrateModalOpen: false,
 
-  setCanvasLocalScaleToReal: async (value) => {
+  setCanvasLocalScaleToReal: async (value: ScaleObject): Promise<void> => {
+    const previousScale = get().canvasLocalScaleToReal;
     set({ canvasLocalScaleToReal: value });
 
     try {
       await window.api.updateLocalConfig({ canvasLocalScaleToReal: value });
     } catch (error) {
       console.error("[LocalConfig] Update failed:", error);
+      set({ canvasLocalScaleToReal: previousScale });
     }
   },
 
-  setIsCalibrateModalOpen: (isOpen) => set({ isCalibrateModalOpen: isOpen }),
+  setIsCalibrateModalOpen: (isOpen: boolean): void => {
+    set({ isCalibrateModalOpen: isOpen });
+  },
 
-  loadLocalConfig: async () => {
+  loadLocalConfig: async (): Promise<void> => {
     try {
       const config = await window.api.getLocalConfig();
-
       const loadedScale = config?.canvasLocalScaleToReal;
+
       if (typeof loadedScale === "number") {
         set({ canvasLocalScaleToReal: { x: loadedScale, y: loadedScale } });
-      } else if (loadedScale && typeof loadedScale === "object") {
+      } else if (
+        loadedScale !== null &&
+        typeof loadedScale === "object" &&
+        typeof loadedScale.x === "number" &&
+        typeof loadedScale.y === "number"
+      ) {
         set({ canvasLocalScaleToReal: loadedScale });
       } else {
-        set({ canvasLocalScaleToReal: { x: 1.0, y: 1.0 } });
+        set({ canvasLocalScaleToReal: DEFAULT_SCALE });
       }
     } catch (error) {
       console.error("[LocalConfig] Load failed:", error);
+      set({ canvasLocalScaleToReal: DEFAULT_SCALE });
     }
   }
 }));
