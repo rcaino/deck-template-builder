@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export type MeasurementUnit = "cm" | "in";
 
@@ -7,7 +8,19 @@ interface PreferencesState {
   setUnit: (unit: MeasurementUnit) => void;
 }
 
-export const usePreferencesStore = create<PreferencesState>((set) => ({
-  unit: "cm",
-  setUnit: (unit) => set({ unit })
-}));
+const DEFAULT_UNIT: MeasurementUnit = "cm";
+
+export const usePreferencesStore = create<PreferencesState>()(
+  persist(
+    (set) => ({
+      unit: DEFAULT_UNIT,
+
+      setUnit: (unit: MeasurementUnit): void => {
+        set({ unit });
+      }
+    }),
+    {
+      name: "user-preferences"
+    }
+  )
+);

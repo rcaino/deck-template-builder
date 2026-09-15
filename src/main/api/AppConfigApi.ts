@@ -1,65 +1,65 @@
 import { app, ipcMain } from "electron";
 import path from "path";
-import fs from "fs";
+import fs from "fs/promises";
+import type { IAppConfig } from "../../common/types";
 
 const CONFIG_PATH = path.join(app.getPath("userData"), "local-config.json");
+const DEFAULT_CONFIG: Readonly<IAppConfig> = { canvasLocalScaleToReal: { x: 1.0, y: 1.0 } };
 
-const ensureConfigFile = (): void => {
-  if (!fs.existsSync(CONFIG_PATH)) {
-    fs.writeFileSync(
-      CONFIG_PATH,
-      JSON.stringify({ canvasLocalScaleToReal: { x: 1.0, y: 1.0 } }, null, 2)
-    );
+const readConfig = async (): Promise<IAppConfig> => {
+  try {
+    const rawData = await fs.readFile(CONFIG_PATH, "utf-8");
+    const data = JSON.parse(rawData) as Partial<IAppConfig>;
+    const scale = data?.canvasLocalScaleToReal;
+
+    if (typeof scale === "number") return { canvasLocalScaleToReal: { x: scale, y: scale } };
+    if (
+      scale &&
+      typeof scale === "object" &&
+      typeof scale.x === "number" &&
+      typeof scale.y === "number"
+    ) {
+      return { canvasLocalScaleToReal: { x: scale.x, y: scale.y } };
+    }
+    return DEFAULT_CONFIG;
+  } catch {
+    return DEFAULT_CONFIG;
   }
 };
 
 class AppConfigApi {
   static registerAppConfigApiHandlers = (): void => {
-    ipcMain.handle("update-local-config", async (_event, config): Promise<{ success: boolean }> => {
-      try {
-        ensureConfigFile();
-
-        const currentData = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
-
-        const updatedData = {
-          ...currentData,
-          canvasLocalScaleToReal: config.canvasLocalScaleToReal
-        };
-
-        fs.writeFileSync(CONFIG_PATH, JSON.stringify(updatedData, null, 2), "utf-8");
-        console.log("Configuración guardada en:", CONFIG_PATH);
-
-        return { success: true };
-      } catch (error) {
-        console.error("Error al guardar la configuración desde fonts.ts:", error);
-        throw error;
-      }
-    });
-
     ipcMain.handle(
-      "get-local-config",
-      async (): Promise<{ canvasLocalScaleToReal: { x: number; y: number } }> => {
+      "update-local-config",
+      async (_event, config: Partial<IAppConfig>): Promise<{ success: boolean }> => {
         try {
-          ensureConfigFile();
-          const currentData = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
-
-          let scale = currentData.canvasLocalScaleToReal;
-
-          if (typeof scale === "number") {
-            scale = { x: scale, y: scale };
-          } else if (!scale || typeof scale !== "object") {
-            scale = { x: 1.0, y: 1.0 };
-          }
-
-          return {
-            canvasLocalScaleToReal: scale
+          const currentData = await readConfig();
+          const updatedData: IAppConfig = {
+            ...currentData,
+            ...config,
+            canvasLocalScaleToReal:
+              config.canvasLocalScaleToReal ?? currentData.canvasLocalScaleToReal
           };
+
+          await fs.writeFile(CONFIG_PATH, JSON.stringify(updatedData, null, 2), "utf-8");
+          return { success: true };
         } catch (error) {
-          console.error("Error al leer la configuración desde fonts.ts:", error);
-          return { canvasLocalScaleToReal: { x: 1.0, y: 1.0 } };
+          const msg = error instanceof Error ? error.message : "Unknown error";
+          console.error("Save config failed:", msg);
+          throw error;
         }
       }
     );
+
+    ipcMain.handle("get-local-config", async (): Promise<IAppConfig> => {
+      try {
+        return await readConfig();
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : "Unknown error";
+        console.error("Read config failed:", msg);
+        return DEFAULT_CONFIG;
+      }
+    });
   };
 }
 

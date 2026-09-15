@@ -5,7 +5,7 @@ import RootLayer from "./Layers/RootLayer";
 import AreaLayer from "./Layers/AreaLayer";
 import FieldLayer from "./Layers/FieldLayer";
 import { Modal, ConfigProvider } from "antd";
-import { Calibrate } from "./Layers/Calibrate";
+import { Calibrate } from "./Calibrate/Calibrate";
 import { useLocalConfigStore } from "../../store/useLocalConfigStore";
 
 interface CanvasViewportProps {
