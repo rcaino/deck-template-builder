@@ -1,60 +1,60 @@
-import { DataType, IComponentStyle } from "./types";
+import type { CSSProperties } from "react";
+import type { DataType, IComponentStyle, IVector2D } from "./types";
 
 export interface IDataDefinitionField {
   fieldName: string;
   dataType: DataType;
 }
 
-export interface IRootLayer {
+export interface ISize2D {
+  width: number;
+  height: number;
+}
+
+export interface IBaseLayer {
   id: string;
   name: string;
+  position: IVector2D;
+  size: ISize2D;
+  style: IComponentStyle;
+}
+
+export interface IRootLayer extends IBaseLayer {
   type: "root";
   position: { x: 0; y: 0 };
-  size: { width: number; height: number };
   ppc: number;
-  style: IComponentStyle;
 }
 
-export interface IAreaLayer {
-  id: string;
-  name: string;
+export type CustomShapePath =
+  | "circle"
+  | "hexagon"
+  | "l-chevron"
+  | "l-point"
+  | "pentagon"
+  | "r-chevron"
+  | "r-point"
+  | "rhombus"
+  | "star"
+  | "triangle";
+
+export type LayerClipPath = CSSProperties["clipPath"] | CustomShapePath;
+
+export interface IAreaLayer extends IBaseLayer {
   type: "area";
-  mappingKey?: string; // The attribute key in the JSON data
-  position: { x: number; y: number };
-  size: { width: number; height: number };
-  style: IComponentStyle;
-  conditionalStyle: Array<keyof IComponentStyle>;
-  backgroundColor?: React.CSSProperties["backgroundColor"];
-  backgroundImage?: React.CSSProperties["backgroundImage"];
-  path?:
-    | React.CSSProperties["clipPath"]
-    | "circle"
-    | "hexagon"
-    | "l-chevron"
-    | "l-point"
-    | "pentagon"
-    | "r-chevron"
-    | "r-point"
-    | "rhombus"
-    | "star"
-    | "triangle";
-  border?: React.CSSProperties["border"];
   level: number;
   parentId: string;
+  mappingKey?: string;
+  conditionalStyle?: (keyof IComponentStyle)[];
+  path?: LayerClipPath;
 }
 
-export interface IDataLayer {
-  id: string;
-  name: string;
+export interface IDataLayer extends IBaseLayer {
   type: "data";
-  dataType: DataType;
-  mappingKey: string; // The attribute key in the JSON data
-  position: { x: number; y: number };
-  size: { width: number; height: number };
-  style: IComponentStyle;
-  fontColor?: React.CSSProperties["color"];
-  fontSize: React.CSSProperties["fontSize"];
-  fontFamily: React.CSSProperties["fontFamily"];
   level: number;
   parentId: string;
+  dataType: DataType;
+  mappingKey: string;
+  fontColor?: CSSProperties["color"];
+  fontSize?: CSSProperties["fontSize"];
+  fontFamily?: CSSProperties["fontFamily"];
 }

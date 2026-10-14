@@ -19,9 +19,8 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
     position: "absolute",
     top: 0,
     left: 0,
-    width: size.width * scale,
-    height: size.height * scale,
-    // objectFit: "cover",
+    width: size.width * scale.x,
+    height: size.height * scale.y,
     pointerEvents: "none"
   };
 
@@ -36,23 +35,52 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
     backgroundPosition: "0 0, 20px 20px",
     cursor: "crosshair",
     position: "relative",
-    width: size.width * scale,
-    height: size.height * scale
+    width: size.width * scale.x,
+    height: size.height * scale.y
   };
 
   const rootStyles: React.CSSProperties = {
     position: "relative",
-    width: size.width * scale,
-    height: size.height * scale,
+    width: size.width * scale.x,
+    height: size.height * scale.y,
     margin: 0,
     padding: 0,
     overflow: "hidden"
   };
+
   const hasBackgroundImage = !style.backgroundColor && isImage(style.backgroundImage as string);
 
-  const backgroundColor = (!hasBackgroundImage && { backgroundColor: style.backgroundColor }) || {};
+  const backgroundColor: React.CSSProperties =
+    !hasBackgroundImage && style.backgroundColor ? { backgroundColor: style.backgroundColor } : {};
 
-  const hasBorder = style.border != undefined;
+  const borderConfig = style.borderConfig;
+
+  const getBorderStyle = (): React.CSSProperties => {
+    if (!borderConfig) return {};
+
+    const computedBorderWidth = `${borderConfig.borderWidth * scale.y}px ${borderConfig.borderWidth * scale.x}px`;
+
+    if ("borderImage" in borderConfig && borderConfig.borderImage) {
+      return {
+        borderStyle: borderConfig.borderStyle,
+        borderWidth: computedBorderWidth,
+        borderImageSlice: borderConfig.borderImageSlice,
+        borderImageRepeat: borderConfig.borderImageRepeat,
+        borderImageSource: `url("${borderConfig.borderImage}")`
+      };
+    }
+
+    return {
+      borderWidth: computedBorderWidth,
+      borderStyle: borderConfig.borderStyle,
+      borderColor: borderConfig.borderColor
+    };
+  };
+
+  const borderSpanStyle: React.CSSProperties = {
+    ...backgroundImgStyle,
+    ...getBorderStyle()
+  };
 
   return (
     <div style={canvasStyles} className="canvas-container">
@@ -73,18 +101,7 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
             alt="Card Background"
           />
         )}
-        {hasBorder && (
-          <span
-            style={{
-              ...backgroundImgStyle,
-              ...style.border,
-              ...{
-                borderWidth: style.border.borderWidth * scale,
-                borderImage: `url(" ${style.border?.["borderImage"]}")`
-              }
-            }}
-          />
-        )}
+        {borderConfig && <span style={borderSpanStyle} />}
         {children}
       </div>
     </div>

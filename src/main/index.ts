@@ -12,6 +12,7 @@ import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { join } from "path";
 import FontAPI from "./api/fontAPI";
 import icon from "../../resources/card-extension.ico?asset";
+import AppConfigApi from "./api/AppConfigApi";
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -74,6 +75,7 @@ app.whenReady().then(() => {
 
   ipcMain.on("ping", () => console.log("pong"));
   FontAPI.registerFontApiHandlers();
+  AppConfigApi.registerAppConfigApiHandlers();
 
   createWindow();
 

@@ -1,6 +1,5 @@
-// src/common/types.ts
-import React from "react";
-import { IAreaLayer, IDataLayer, IRootLayer } from "./layerTypes";
+import type { CSSProperties } from "react";
+import type { IAreaLayer, IDataLayer, IRootLayer } from "./layerTypes";
 
 export const GRID_SNAP = 10;
 
@@ -9,20 +8,24 @@ export type IComponentDefinition = IRootLayer | IAreaLayer | IDataLayer;
 export type ILevelLayer = IAreaLayer | IDataLayer;
 
 export interface IComponentStyle {
-  backgroundImage?: React.CSSProperties["backgroundImage"];
-  backgroundColor?: React.CSSProperties["backgroundColor"];
-  border?:
+  backgroundImage?: CSSProperties["backgroundImage"];
+  backgroundColor?: CSSProperties["backgroundColor"];
+  borderConfig?:
     | {
         borderWidth: number;
-        borderStyle: React.CSSProperties["borderStyle"];
-        borderColor: React.CSSProperties["borderColor"];
+        borderStyle: CSSProperties["borderStyle"];
+        borderColor: CSSProperties["borderColor"];
+        borderImage?: never;
+        borderImageSlice: never;
+        borderImageRepeat: never;
       }
     | {
         borderStyle: "solid";
         borderWidth: number;
-        borderImage: React.CSSProperties["borderImage"];
-        borderImageSlice: React.CSSProperties["borderImageSlice"];
+        borderImage: CSSProperties["borderImage"];
+        borderImageSlice: CSSProperties["borderImageSlice"];
         borderImageRepeat: "round";
+        borderColor?: never;
       };
 }
 
@@ -32,8 +35,19 @@ export interface ICardProject {
   components: IComponentDefinition[];
 }
 
+export type FontType = "local" | "system";
+
 export interface IFontInfo {
   name: string;
   path: string;
-  type: "local" | "system";
+  type: FontType;
+}
+
+export interface IVector2D {
+  x: number;
+  y: number;
+}
+
+export interface IAppConfig {
+  canvasLocalScaleToReal: IVector2D;
 }

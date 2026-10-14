@@ -1,4 +1,4 @@
 export default interface ILayerTreeProps {
-  scale: number;
+  scale: { x: number; y: number };
   ref: React.Ref<HTMLElement>;
 }

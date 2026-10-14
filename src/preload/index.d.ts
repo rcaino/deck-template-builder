@@ -1,11 +1,13 @@
 import { ElectronAPI } from "@electron-toolkit/preload";
-import type { FontInfo } from "@common/types";
+import type { IFontInfo, IAppConfig } from "@common/types";
 
 declare global {
   interface Window {
     electron: ElectronAPI;
     api: {
-      getAvailableFonts: () => Promise<FontInfo[]>;
+      getAvailableFonts: () => Promise<IFontInfo[]>;
+      updateLocalConfig: (config: Partial<IAppConfig>) => Promise<void>;
+      getLocalConfig: () => Promise<IAppConfig>;
     };
   }
 }

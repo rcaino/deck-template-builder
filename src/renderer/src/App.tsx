@@ -1,10 +1,11 @@
+import { useEffect } from "react";
 import { Layout } from "antd";
 import Navbar from "./components/TopHeader/Navbar";
 import Canvas from "./components/Canvas/Canvas";
 import LeftPanel from "./components/LeftPanel/LeftPanel";
 import RightPanel from "./components/RightPanel/RightPanel";
 import { useFontStore } from "./store/useFontStore";
-import { useEffect } from "react";
+import { useLocalConfigStore } from "./store/useLocalConfigStore";
 
 const layoutStyle: React.CSSProperties = {
   borderRadius: 8,
@@ -16,11 +17,10 @@ const layoutStyle: React.CSSProperties = {
 };
 
 function App(): React.JSX.Element {
-  const loadFonts = useFontStore((state) => state.loadFonts);
-
   useEffect(() => {
-    loadFonts();
-  }, [loadFonts]);
+    useFontStore.getState().loadFonts();
+    useLocalConfigStore.getState().loadLocalConfig();
+  }, []);
 
   return (
     <Layout style={layoutStyle}>
