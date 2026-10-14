@@ -43,12 +43,14 @@ export const useLocalConfigStore = create<LocalConfigState>((set, get) => ({
       if (typeof loadedScale === "number") {
         set({ canvasLocalScaleToReal: { x: loadedScale, y: loadedScale } });
       } else if (
-        loadedScale !== null &&
+        loadedScale &&
         typeof loadedScale === "object" &&
+        "x" in loadedScale &&
+        "y" in loadedScale &&
         typeof loadedScale.x === "number" &&
         typeof loadedScale.y === "number"
       ) {
-        set({ canvasLocalScaleToReal: loadedScale });
+        set({ canvasLocalScaleToReal: { x: loadedScale.x, y: loadedScale.y } });
       } else {
         set({ canvasLocalScaleToReal: DEFAULT_SCALE });
       }

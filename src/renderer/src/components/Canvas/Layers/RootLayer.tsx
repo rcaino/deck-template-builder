@@ -47,15 +47,40 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
     padding: 0,
     overflow: "hidden"
   };
+
   const hasBackgroundImage = !style.backgroundColor && isImage(style.backgroundImage as string);
 
-  const backgroundColor = (!hasBackgroundImage && { backgroundColor: style.backgroundColor }) || {};
+  const backgroundColor: React.CSSProperties =
+    !hasBackgroundImage && style.backgroundColor ? { backgroundColor: style.backgroundColor } : {};
 
-  const hasBorder = style.border != undefined;
+  const borderConfig = style.borderConfig;
 
-  const computedBorderWidth = style.border?.borderWidth
-    ? `${style.border.borderWidth * scale.y}px ${style.border.borderWidth * scale.x}px`
-    : undefined;
+  const getBorderStyle = (): React.CSSProperties => {
+    if (!borderConfig) return {};
+
+    const computedBorderWidth = `${borderConfig.borderWidth * scale.y}px ${borderConfig.borderWidth * scale.x}px`;
+
+    if ("borderImage" in borderConfig && borderConfig.borderImage) {
+      return {
+        borderStyle: borderConfig.borderStyle,
+        borderWidth: computedBorderWidth,
+        borderImageSlice: borderConfig.borderImageSlice,
+        borderImageRepeat: borderConfig.borderImageRepeat,
+        borderImageSource: `url("${borderConfig.borderImage}")`
+      };
+    }
+
+    return {
+      borderWidth: computedBorderWidth,
+      borderStyle: borderConfig.borderStyle,
+      borderColor: borderConfig.borderColor
+    };
+  };
+
+  const borderSpanStyle: React.CSSProperties = {
+    ...backgroundImgStyle,
+    ...getBorderStyle()
+  };
 
   return (
     <div style={canvasStyles} className="canvas-container">
@@ -76,20 +101,7 @@ const RootLayer: React.FC<LayerRootProps> = ({ layerProps, scale, children }: La
             alt="Card Background"
           />
         )}
-        {hasBorder && (
-          <span
-            style={
-              {
-                ...backgroundImgStyle,
-                ...style.border,
-                borderWidth: computedBorderWidth,
-                borderImage: style.border?.borderImage
-                  ? `url("${style.border.borderImage}")`
-                  : undefined
-              } as React.CSSProperties
-            }
-          />
-        )}
+        {borderConfig && <span style={borderSpanStyle} />}
         {children}
       </div>
     </div>

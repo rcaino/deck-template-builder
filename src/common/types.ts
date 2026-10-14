@@ -1,16 +1,16 @@
 import type { CSSProperties } from "react";
 import type { IAreaLayer, IDataLayer, IRootLayer } from "./layerTypes";
 
-export const GRID_SNAP = 10 as const;
+export const GRID_SNAP = 10;
 
 export type DataType = "text" | "numeric" | "image" | "sprite";
 export type IComponentDefinition = IRootLayer | IAreaLayer | IDataLayer;
 export type ILevelLayer = IAreaLayer | IDataLayer;
 
 export interface IComponentStyle {
-  readonly backgroundImage?: CSSProperties["backgroundImage"];
-  readonly backgroundColor?: CSSProperties["backgroundColor"];
-  readonly border?: Readonly<
+  backgroundImage?: CSSProperties["backgroundImage"];
+  backgroundColor?: CSSProperties["backgroundColor"];
+  borderConfig?:
     | {
         borderWidth: number;
         borderStyle: CSSProperties["borderStyle"];
@@ -26,29 +26,28 @@ export interface IComponentStyle {
         borderImageSlice: CSSProperties["borderImageSlice"];
         borderImageRepeat: "round";
         borderColor?: never;
-      }
-  >;
+      };
 }
 
 export interface ICardProject {
-  readonly id: string;
-  readonly name: string;
-  readonly components: readonly IComponentDefinition[];
+  id: string;
+  name: string;
+  components: IComponentDefinition[];
 }
 
 export type FontType = "local" | "system";
 
 export interface IFontInfo {
-  readonly name: string;
-  readonly path: string;
-  readonly type: FontType;
+  name: string;
+  path: string;
+  type: FontType;
 }
 
 export interface IVector2D {
-  readonly x: number;
-  readonly y: number;
+  x: number;
+  y: number;
 }
 
 export interface IAppConfig {
-  readonly canvasLocalScaleToReal: Readonly<IVector2D>;
+  canvasLocalScaleToReal: IVector2D;
 }

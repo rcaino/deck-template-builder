@@ -24,7 +24,7 @@ const FieldLayer: React.FC<FieldLayerProps> = (props) => {
 
   const rawValue = cardData ? cardData[mappingKey] : undefined;
 
-  const containerStyles = {
+  const containerStyles: React.CSSProperties = {
     position: "absolute",
     left: position.x * scale.x,
     top: position.y * scale.y,
@@ -32,7 +32,7 @@ const FieldLayer: React.FC<FieldLayerProps> = (props) => {
     height: size.height * scale.y,
     zIndex: level + 1,
     ...style
-  } as React.CSSProperties;
+  };
 
   const scaledFontSize = typeof fontSize === "number" ? fontSize * scale.y : undefined;
 

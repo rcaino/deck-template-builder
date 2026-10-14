@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Layout } from "antd";
 import Navbar from "./components/TopHeader/Navbar";
 import Canvas from "./components/Canvas/Canvas";
@@ -15,10 +16,12 @@ const layoutStyle: React.CSSProperties = {
   bottom: 0
 };
 
-useFontStore.getState().loadFonts();
-useLocalConfigStore.getState().loadLocalConfig();
-
 function App(): React.JSX.Element {
+  useEffect(() => {
+    useFontStore.getState().loadFonts();
+    useLocalConfigStore.getState().loadLocalConfig();
+  }, []);
+
   return (
     <Layout style={layoutStyle}>
       <Navbar />

@@ -1,9 +1,9 @@
 import { ThemeConfig, theme } from "antd";
 
-// Paleta de colores base unificada (Indigo & Slate)
+// Unified base color palette (Indigo & Slate)
 const colors = {
   primaryLight: "#4f46e5", // Indigo 600
-  primaryDark: "#6366f1", // Indigo 500 (Más brillante para modo oscuro)
+  primaryDark: "#6366f1", // Indigo 500 (Brighter for dark mode)
   primaryDarkHover: "#818cf8", // Indigo 400
 
   success: "#10b981", // Emerald 500
@@ -11,7 +11,7 @@ const colors = {
   error: "#f43f5e", // Rose 500
   info: "#3b82f6", // Blue 500
 
-  // Neutros claros
+  // Light neutrals
   bgLightBase: "#ffffff",
   bgLightLayout: "#f8fafc", // Slate 50
   bgLightContainer: "#fafafa",
@@ -22,7 +22,7 @@ const colors = {
   borderLightSecondary: "#6366f1",
   railLight: "#e2e8f0", // Slate 200
 
-  // Neutros oscuros
+  // Dark neutrals
   bgDarkBase: "#0f172a", // Slate 900
   bgDarkLayout: "#020617", // Slate 950
   bgDarkContainer: "#1e293b", // Slate 800
@@ -31,15 +31,17 @@ const colors = {
   textDarkPlaceholder: "#64748b", // Slate 500
   borderDark: "#334155", // Slate 700
   borderDarkSecondary: "#1e293b", // Slate 800
-  railDarkHover: "#475569", // Slate 600
-
-  // Compartidos / Transparencias
-  shadowLight: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
-  shadowLightLarge: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
-  shadowDarkLarge: "0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5)"
+  railDarkHover: "#475569" // Slate 600
 };
 
-// --- CONFIGURACIÓN BASE COMPARTIDA ---
+// Elevation / Box shadows
+const shadows = {
+  light: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+  lightLarge: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+  darkLarge: "0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5)"
+};
+
+// --- SHARED BASE CONFIGURATION ---
 const baseToken = {
   fontFamily:
     "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
@@ -48,7 +50,7 @@ const baseToken = {
   colorSplit: "transparent"
 };
 
-// --- TEMA CLARO ---
+// --- LIGHT THEME ---
 export const lightTheme: ThemeConfig = {
   algorithm: theme.defaultAlgorithm,
   token: {
@@ -74,7 +76,7 @@ export const lightTheme: ThemeConfig = {
       siderBg: colors.bgLightContainer
     },
     Card: {
-      boxShadowTertiary: colors.shadowLight
+      boxShadowTertiary: shadows.light
     },
     Tabs: {
       colorBgBase: colors.bgLightLayout,
@@ -87,7 +89,7 @@ export const lightTheme: ThemeConfig = {
       footerBg: "transparent",
       titleColor: colors.textLight,
       borderRadiusLG: 12,
-      boxShadow: colors.shadowLightLarge
+      boxShadow: shadows.lightLarge
     },
     Slider: {
       railBg: colors.railLight,
@@ -100,7 +102,7 @@ export const lightTheme: ThemeConfig = {
   }
 };
 
-// --- TEMA OSCURO ---
+// --- DARK THEME ---
 export const darkTheme: ThemeConfig = {
   algorithm: theme.darkAlgorithm,
   token: {
@@ -139,7 +141,7 @@ export const darkTheme: ThemeConfig = {
       footerBg: "transparent",
       titleColor: colors.textDark,
       borderRadiusLG: 12,
-      boxShadow: colors.shadowDarkLarge
+      boxShadow: shadows.darkLarge
     },
     Slider: {
       railBg: colors.borderDark,

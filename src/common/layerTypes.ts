@@ -2,27 +2,27 @@ import type { CSSProperties } from "react";
 import type { DataType, IComponentStyle, IVector2D } from "./types";
 
 export interface IDataDefinitionField {
-  readonly fieldName: string;
-  readonly dataType: DataType;
+  fieldName: string;
+  dataType: DataType;
 }
 
 export interface ISize2D {
-  readonly width: number;
-  readonly height: number;
+  width: number;
+  height: number;
 }
 
 export interface IBaseLayer {
-  readonly id: string;
-  readonly name: string;
-  readonly position: Readonly<IVector2D>;
-  readonly size: Readonly<ISize2D>;
-  readonly style: Readonly<IComponentStyle>;
+  id: string;
+  name: string;
+  position: IVector2D;
+  size: ISize2D;
+  style: IComponentStyle;
 }
 
 export interface IRootLayer extends IBaseLayer {
-  readonly type: "root";
-  readonly position: { readonly x: 0; readonly y: 0 };
-  readonly ppc: number;
+  type: "root";
+  position: { x: 0; y: 0 };
+  ppc: number;
 }
 
 export type CustomShapePath =
@@ -40,21 +40,21 @@ export type CustomShapePath =
 export type LayerClipPath = CSSProperties["clipPath"] | CustomShapePath;
 
 export interface IAreaLayer extends IBaseLayer {
-  readonly type: "area";
-  readonly level: number;
+  type: "area";
+  level: number;
   parentId: string;
-  readonly mappingKey?: string;
-  readonly conditionalStyle?: readonly (keyof IComponentStyle)[];
-  readonly path?: LayerClipPath;
+  mappingKey?: string;
+  conditionalStyle?: (keyof IComponentStyle)[];
+  path?: LayerClipPath;
 }
 
 export interface IDataLayer extends IBaseLayer {
-  readonly type: "data";
-  readonly level: number;
+  type: "data";
+  level: number;
   parentId: string;
-  readonly dataType: DataType;
-  readonly mappingKey: string;
-  readonly fontColor?: CSSProperties["color"];
-  readonly fontSize?: CSSProperties["fontSize"];
-  readonly fontFamily?: CSSProperties["fontFamily"];
+  dataType: DataType;
+  mappingKey: string;
+  fontColor?: CSSProperties["color"];
+  fontSize?: CSSProperties["fontSize"];
+  fontFamily?: CSSProperties["fontFamily"];
 }

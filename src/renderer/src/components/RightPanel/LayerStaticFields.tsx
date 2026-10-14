@@ -18,10 +18,10 @@ export const LayerStaticFields: React.FC<ILayerFieldsProps> = ({ layer, isForPri
   const isDataLayer = layer.type === "data";
   const isTextOrNumeric = isDataLayer && ["text", "numeric"].includes(layer.dataType);
   const hasBackground = !isDataLayer;
-  const hasBorder = layer.style.border != undefined;
+  const hasBorder = layer.style.borderConfig != undefined;
   const [bgImage, setBgImage] = useState<string>(layer.style.backgroundImage as string);
   const [borderImage, setBorderImage] = useState<string>(
-    layer.style.border?.["borderImage"] as string
+    layer.style.borderConfig?.["borderImage"] as string
   );
 
   return (
